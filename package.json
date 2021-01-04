@@ -1,0 +1,16 @@
+{
+  "name": "bingo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "lerna run --stream start",
+    "initialize": "npm install && lerna bootstrap"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "lerna": "^3.22.1",
+    "typescript-plugin-css-modules": "^3.0.1"
+  }
+}
