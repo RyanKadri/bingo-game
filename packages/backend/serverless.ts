@@ -19,7 +19,8 @@ const config: Serverless = {
     ]
   },
   plugins: [
-    "serverless-webpack"
+    "serverless-webpack",
+    // "serverless-domain-manager"
   ],
   functions: {
     generateBoard: {
@@ -76,7 +77,16 @@ const config: Serverless = {
       webpackConfig: "webpack.config.ts",
       includeModules: true,
       forceExclude: ["aws-sdk"]
-    }
+    },
+    // customDomain: {
+    //   domainName: "bingo-api.rk0.xyz",
+    //   stage: "$default",
+    //   certificateName: "*.rk0.xyz",
+    //   createRoute53Record: false,
+    //   autoDomain: true,
+    //   apiType: "http",
+    //   endpointType: "regional"
+    // }
   }
 }
 

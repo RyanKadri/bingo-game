@@ -1,5 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { Board } from "../../common/src/types/board";
+import { NewBoard } from "../../common/src/types/board";
 import { assertExists } from "../../common/src/utils/utils";
 
 const boardTable = assertExists(
@@ -12,14 +12,15 @@ export class BoardService {
         private client: DocumentClient
     ) {}
 
-    fetchBoard(boardId: string) {
-        return this.client.get({
+    async fetchBoard(boardId: string) {
+        const resp = await this.client.get({
             TableName: boardTable,
             Key: { id: boardId }
         }).promise();
+        return resp.Item;
     }
     
-    saveBoard(newBoard: Board) {
+    saveBoard(newBoard: NewBoard) {
         return this.client.put({ 
             TableName: boardTable,
             Item: newBoard

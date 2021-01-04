@@ -1,8 +1,13 @@
+import ky from "ky";
 import { useEffect, useState } from "react"
-import { Board } from "../../../common/src/types/board";
+import { useHistory } from "react-router-dom";
+import { BingoGame, NewBoard } from "../../../common/src/types/board";
 import { createBoard } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
+import { config } from "../utils/config";
 import styles from "./CreateGameView.module.css";
+
+const defaultGameName = "Bingo with Friends";
 
 function defaultMaxNumber(numLetters: number) {
     return numLetters ** 2 * 3;
@@ -12,13 +17,15 @@ export function CreateGameView() {
     const [ gameLetters, setGameLetters ] = useState("BINGO");
     const [ maxNumber, setMaxNumber ] = useState(defaultMaxNumber(gameLetters.length));
     const [ freeCenter, setFreeCenter ] = useState(true);
+    const [ gameName, setGameName ] = useState("");
 
-    const [ exampleBoard, setExampleBoard ] = useState<Board | null>(null);
+    const [ exampleBoard, setExampleBoard ] = useState<NewBoard | null>(null);
+    const history = useHistory();
     const evenRows = gameLetters.length % 2 === 0;
 
     useEffect(() => {
         setExampleBoard(
-            createBoard({ 
+            createBoard({
                 letters: gameLetters, 
                 rows: gameLetters.length,
                 maxNumber, 
@@ -43,25 +50,30 @@ export function CreateGameView() {
         setFreeCenter(e.target.checked);
     }
 
-    const onCreateGame = () => {
-        fetch("https://xfto3unddk.execute-api.us-east-1.amazonaws.com/games",{
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ 
-                letters: gameLetters, 
-                rows: gameLetters.length,
-                maxNumber, 
-                freeCenter: evenRows ? false : freeCenter
-            })
-        })
+    const onCreateGame = async () => {
+        const newGame: BingoGame = await ky.post(`${config.backend}/games`, { 
+            json: {
+                name: gameName || defaultGameName,
+                gameParams: {
+                    letters: gameLetters, 
+                    rows: gameLetters.length,
+                    maxNumber, 
+                    freeCenter: evenRows ? false : freeCenter
+                }
+            }
+        }).json();
+        history.push(`/game/${newGame.id}/host`);
     }
 
     return (
         <main className={ styles.container }>
             <h1>Create a Bingo Game</h1>
             <form className={ styles.boardParams }>
+                <label>Game Name:
+                    <input type="text"
+                           value={ gameName }
+                           onChange={ e => setGameName(e.target.value) } />
+                </label>
                 <label>Game Letters:
                     <input type="text" 
                         value={ gameLetters }

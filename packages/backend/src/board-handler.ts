@@ -34,7 +34,7 @@ export const fetchBoard: APIGatewayProxyHandlerV2 = async (e) => {
     const board = await boardService.fetchBoard(e.pathParameters!.boardId!);
     
     return {
-        statusCode: 200,
+        statusCode: !!board ? 200 : 404,
         body: JSON.stringify(board),
         ...withCors()
     }

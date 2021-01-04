@@ -1,5 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { BingoGame, BoardParams } from "../../common/src/types/board";
+import { BingoGame, NewBingoGame } from "../../common/src/types/board";
 import { assertExists } from "../../common/src/utils/utils";
 import { shortUID } from "./utils/utils";
 
@@ -13,10 +13,11 @@ export class GameService {
         private client: DocumentClient
     ){}
 
-    async saveGame(boardParams: BoardParams) {
+    async saveGame(newGame: NewBingoGame) {
         const game: BingoGame = {
             id: shortUID(),
-            gameParams: boardParams,
+            name: newGame.name,
+            gameParams: newGame.gameParams,
             calledNumbers: [],
             boards: []
         }
@@ -29,20 +30,22 @@ export class GameService {
         return game;
     }
 
-    fetchBoard(boardId: string) {
-        return this.client.get({
+    async fetchGame(boardId: string) {
+        const resp = await this.client.get({
             TableName: gameTable,
             Key: {
                 id: boardId
             }
         }).promise();
+        
+        return resp.Item;
     }
 
     registerBoard(gameId: string, boardId: string) {
         return this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
-            UpdateExpression: "set #boards = list_append(#board, :boardId)",
+            UpdateExpression: "set #boards = list_append(#boards, :boardId)",
             ExpressionAttributeNames: {
               "#boards": "boards"
             },

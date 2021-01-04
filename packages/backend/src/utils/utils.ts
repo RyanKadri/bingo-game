@@ -12,5 +12,8 @@ export function withCors(others: { [key: string]: string } = {}) {
 export function shortUID() {
     const buff = Buffer.alloc(16);
     v4(undefined, buff);
-    return buff.toString("base64");
+    return buff.toString("base64")
+        .replace(/\//g, ".")
+        .replace(/=/g, "-")
+        .replace(/\+/g, "_")
 }

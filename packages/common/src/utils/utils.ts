@@ -1,11 +1,11 @@
-import { Board, BoardParams, Cell } from "../types/board";
+import { NewBoard, BoardParams, Cell } from "../types/board";
 
 export function randBetween(min: number, max: number) {
     const range = max - min + 1;
     return Math.floor(Math.random() * range) + min;
 }
 
-export function createBoard(params: BoardParams): Board {
+export function createBoard(params: BoardParams): NewBoard {
     const numColumns = params.letters.length;
     const numsPerColumn = params.maxNumber / numColumns;
     let currentMin = 1;
@@ -28,7 +28,7 @@ export function createBoard(params: BoardParams): Board {
         const centerCol = Math.floor(params.letters.length / 2);
         const col = cells[centerCol]!;
         const centerRow = Math.floor(col.length / 2);
-        col[centerRow] = { type: "free" }
+        col[centerRow] = { type: "free", selected: true }
     }
     return {
         columns: cells,

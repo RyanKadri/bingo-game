@@ -7,7 +7,7 @@ export function LandingInstructionsView() {
             <div className={ styles.card }>
                 <h1>Bingo X-TREME</h1>
                 <h2>Play with friends online!</h2>
-                <Link to="/create">Create a Game</Link>
+                <Link to="/game/create">Create a Game</Link>
                 <article className={ styles.instructions }>
                     <header>The Caller:</header>
                     <ol>
