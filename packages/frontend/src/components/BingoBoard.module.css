@@ -17,6 +17,11 @@
     border-bottom-width: 3px;
 }
 
+.boardTable.rowWise th {
+    border-bottom-width: unset;
+    border-right-width: 3px;
+}
+
 .selectable tbody td:hover {
     background-color: rgba(0,0,0,0.15);
     cursor: pointer;

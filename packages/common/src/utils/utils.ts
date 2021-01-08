@@ -31,7 +31,7 @@ export function createBoard(params: BoardParams): NewBoard {
         col[centerRow] = { type: "free", selected: true }
     }
     return {
-        columns: cells,
+        categories: cells,
         letters: params.letters
     }
 }
@@ -43,3 +43,17 @@ export function assertExists<T>(thing: T | null | undefined, message: string): T
         throw new Error(message)
     }
 }
+
+export function transposeCells(board: NewBoard): Cell[][] {
+    const rows: Cell[][] = [];
+    for(let rowNum = 0; rowNum < board.categories[0].length; rowNum ++) {
+        const row: Cell[] = [];
+        for(const col of board.categories) {
+            row.push(col[rowNum]);
+        }
+        rows.push(row);
+    }
+    return rows;
+}
+
+export function noop() {}

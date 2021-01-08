@@ -1,0 +1,16 @@
+{
+    "eslintConfig": {
+      "extends": ["react-app"],
+      "rules": {
+        "no-restricted-globals": "false"
+      },
+      "overrides": [
+        {
+          "files": ["**/*.ts?(x)"],
+          "rules": {
+            "additional-typescript-only-rule": "warn"
+          }
+        }
+      ]
+    }
+  }

@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BoardParams } from "../../common/src/types/board";
+import { BoardParams, CreatedBoard } from "../../common/src/types/board";
 import { createBoard } from "../../common/src/utils/utils";
 import { BoardService } from "./board-service";
 import { useClient } from "./dynamoClient";
@@ -36,6 +36,17 @@ export const fetchBoard: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: !!board ? 200 : 404,
         body: JSON.stringify(board),
+        ...withCors()
+    }
+}
+
+export const updateBoard: APIGatewayProxyHandlerV2 = async (e) => {
+    const boardUpdate = JSON.parse(e.body!) as CreatedBoard;
+    await boardService.updateBoard(boardUpdate);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(boardUpdate),
         ...withCors()
     }
 }

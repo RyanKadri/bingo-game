@@ -14,6 +14,7 @@ export function shortUID() {
     v4(undefined, buff);
     return buff.toString("base64")
         .replace(/\//g, ".")
+        .replace(/=+$/g, "")
         .replace(/=/g, "-")
         .replace(/\+/g, "_")
 }

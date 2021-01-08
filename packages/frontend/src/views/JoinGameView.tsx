@@ -1,7 +1,7 @@
 import ky from "ky";
 import { useHistory, useParams } from "react-router-dom";
 import useSWR from "swr";
-import { BingoGame, CreatedBoard, NewBoard } from "../../../common/src/types/board";
+import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
 import { config } from "../utils/config";
 
 export function JoinGameView() {
@@ -9,7 +9,7 @@ export function JoinGameView() {
     const history = useHistory();
     const fetchGameURL = `${config.backend}/games/${gameId}`;
 
-    const { data, error, isValidating } = useSWR<BingoGame>(fetchGameURL, () => (
+    const { data, isValidating } = useSWR<BingoGame>(fetchGameURL, () => (
         ky.get(fetchGameURL).json<BingoGame>()
     ));
 
@@ -26,11 +26,11 @@ export function JoinGameView() {
     
     return (
         <main>
-            { (isValidating || !data)
+            { (!data || isValidating)
                 ? <h1>Loading</h1>
                 : (
                     <>
-                        <h1>Joining { data.name }</h1>
+                        <h1>Joining { data!.name }</h1>
                         <button onClick={ onCreateBoard }>Create a board</button>
                     </>
                 )

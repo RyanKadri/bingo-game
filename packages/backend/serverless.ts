@@ -47,6 +47,18 @@ const config: Serverless = {
         }
       ]
     },
+    updateBoard: {
+      handler: "src/board-handler.updateBoard",
+      environment: { ...dynamoEnvironment },
+      events: [
+        {
+          httpApi: {
+            path: "/boards/{boardId}",
+            method: "put"
+          }
+        }
+      ]
+    },
     createGame: {
       handler: "src/game-handler.createGame",
       environment: { ... dynamoEnvironment },
@@ -55,6 +67,18 @@ const config: Serverless = {
           httpApi: {
             path: "/games",
             method: "post",
+          }
+        }
+      ]
+    },
+    updateGame: {
+      handler: "src/game-handler.updateGame",
+      environment: { ... dynamoEnvironment },
+      events: [
+        {
+          httpApi: {
+            path: "/games",
+            method: "put",
           }
         }
       ]

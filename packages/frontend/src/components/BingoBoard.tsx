@@ -1,54 +1,89 @@
 import { NewBoard, Cell } from "../../../common/src/types/board";
 import styles from "./BingoBoard.module.css";
 import c from "classnames";
+import { noop, transposeCells } from "../../../common/src/utils/utils";
 
 interface Props {
     board: NewBoard;
     canSelect?: boolean;
-    onCellSelect?: (cell: Cell) => void
+    rowWise?: boolean;
+    onCellSelect?: (col: number, row: number, cell: Cell) => void
 }
 
-function extractRows(board: NewBoard): Cell[][] {
-    const rows: Cell[][] = [];
-    for(let rowNum = 0; rowNum < board.columns[0].length; rowNum ++) {
-        const row: Cell[] = [];
-        for(const col of board.columns) {
-            row.push(col[rowNum]);
-        }
-        rows.push(row);
-    }
-    return rows;
+interface DefaultedProps {
+    board: NewBoard;
+    canSelect: boolean;
+    onCellSelect: (col: number, row: number, cell: Cell) => void
 }
 
-export function BingoBoard({ board, canSelect = false, onCellSelect = () => {} }: Props) {
-    const rows = extractRows(board)
+export function BingoBoard({ 
+    board, 
+    canSelect = false, 
+    onCellSelect = noop, 
+    rowWise = false
+}: Props) {
 
+    const selectHandler = canSelect ? onCellSelect : noop;
     return (
         <section>
-            <table className={ c(styles.boardTable, { [styles.selectable]: canSelect }) }>
-                <thead>
-                    <tr>
-                        { board.letters.split("").map(letter => (
-                            <th key={letter}>{ letter }</th>
-                        )) }
-                    </tr>
-                </thead>
-                <tbody>
-                    { rows.map((row, rowInd) => (
-                        <tr key={ rowInd }>
-                            {
-                                row.map((cell, cellInd) => (
-                                    <td key={ cellInd } className={ c({ [styles.selected]: cell.selected }) }>
-                                        { cell.type === "free"
-                                            ? "Free"
-                                            : cell.number }
-                                    </td>
-                                ))
-                            }
-                        </tr>
-                    ))}
-                </tbody>
+            <table className={ c(styles.boardTable, { [styles.selectable]: canSelect, [styles.rowWise]: rowWise }) }>
+                { rowWise
+                    ? <HorizontalBoard board={ board } canSelect={ canSelect } onCellSelect={ selectHandler } />
+                    : <VerticalBoard board={ board } canSelect={ canSelect } onCellSelect={ selectHandler } />
+                }
             </table>
         </section>
+    )
+}
+
+function VerticalBoard({ board, onCellSelect}: DefaultedProps) {
+    const rows = transposeCells(board);
+
+    return (
+        <>
+        <thead>
+            <tr>
+                { board.letters.split("").map(letter => (
+                    <th key={letter}>{ letter }</th>
+                )) }
+            </tr>
+        </thead>
+        <tbody>
+            { rows.map((row, rowInd) => (
+                <tr key={ rowInd }>
+                    {
+                        row.map((cell, cellInd) => (
+                            <td key={ cellInd } className={ c({ [styles.selected]: cell.selected }) }
+                                onClick={ () => onCellSelect(cellInd, rowInd, cell) }>
+                                { cell.type === "free"
+                                    ? "Free"
+                                    : cell.number }
+                            </td>
+                        ))
+                    }
+                </tr>
+            ))}
+        </tbody>
+        </>
+    )
+}
+
+function HorizontalBoard({ board, onCellSelect}: DefaultedProps) {
+    return (
+        <tbody>
+            { board.categories.map((category, categoryInd) => (
+                <tr key={ categoryInd }>
+                    <th>{board.letters[categoryInd]}</th>
+                    { category.map((cell, cellInd) => (
+                        <td key={ cellInd } className={ c({ [styles.selected]: cell.selected }) }
+                            onClick={ () => onCellSelect(categoryInd, cellInd, cell) }>
+                            { cell.type === "free"
+                                ? "Free"
+                                : cell.number }
+                        </td>
+                    )) }
+                </tr>
+            )) }
+        </tbody>
     )
 }

@@ -16,7 +16,7 @@ export interface BoardParams {
 }
 
 export interface NewBoard {
-    columns: Cell[][];
+    categories: Cell[][];
     letters: string;
 }
 

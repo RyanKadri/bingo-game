@@ -30,6 +30,15 @@ export class GameService {
         return game;
     }
 
+    async updateGame(updatedBoard: BingoGame) {
+        await this.client.put({
+            TableName: gameTable,
+            Item: updatedBoard
+        }).promise();
+
+        return updatedBoard;
+    }
+
     async fetchGame(boardId: string) {
         const resp = await this.client.get({
             TableName: gameTable,

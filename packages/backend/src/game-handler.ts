@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { NewBingoGame } from "../../common/src/types/board";
+import { BingoGame, NewBingoGame } from "../../common/src/types/board";
 import { useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { withCors } from "./utils/utils";
@@ -25,6 +25,17 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: !!game ? 200 : 404,
         body: JSON.stringify(game),
+        ...withCors()
+    }
+}
+
+export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
+    const boardUpdate: BingoGame = JSON.parse(e.body!)
+    const update = await gameService.updateGame(boardUpdate);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify(update),
         ...withCors()
     }
 }

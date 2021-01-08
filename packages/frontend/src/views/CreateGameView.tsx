@@ -6,6 +6,7 @@ import { createBoard } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { config } from "../utils/config";
 import styles from "./CreateGameView.module.css";
+import sharedStyles from "./game-view.module.css";
 
 const defaultGameName = "Bingo with Friends";
 
@@ -66,7 +67,7 @@ export function CreateGameView() {
     }
 
     return (
-        <main className={ styles.container }>
+        <main className={ sharedStyles.container }>
             <h1>Create a Bingo Game</h1>
             <form className={ styles.boardParams }>
                 <label>Game Name:
