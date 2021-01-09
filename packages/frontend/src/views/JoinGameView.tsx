@@ -1,40 +1,39 @@
 import ky from "ky";
+import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
+import { Header, Loader } from "semantic-ui-react";
 import useSWR from "swr";
 import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
 import { config } from "../utils/config";
+import sharedStyles from "./game-view.module.css";
 
 export function JoinGameView() {
     const { gameId } = useParams<{ gameId: string }>();
     const history = useHistory();
     const fetchGameURL = `${config.backend}/games/${gameId}`;
 
-    const { data, isValidating } = useSWR<BingoGame>(fetchGameURL, () => (
+    const { data } = useSWR<BingoGame>(fetchGameURL, () => (
         ky.get(fetchGameURL).json<BingoGame>()
     ));
 
-    const onCreateBoard = async () => {
+    useEffect(() => {
         if(data) {
-            const newBoard = await ky.post(`${config.backend}/games/${gameId}/boards`, {
+            ky.post(`${config.backend}/games/${gameId}/boards`, {
                 json: {
                     ...data.gameParams
                 }
-            }).json<CreatedBoard>();
-            history.push(`/game/${gameId}/board/${newBoard.id}`)
+            })
+            .json<CreatedBoard>()
+            .then(newBoard => {
+                history.push(`/game/${gameId}/board/${newBoard.id}`)
+            });
         }
-    }
-    
+    }, [gameId, data, history])
+
     return (
-        <main>
-            { (!data || isValidating)
-                ? <h1>Loading</h1>
-                : (
-                    <>
-                        <h1>Joining { data!.name }</h1>
-                        <button onClick={ onCreateBoard }>Create a board</button>
-                    </>
-                )
-            }
+        <main className={ sharedStyles.container }>
+            <Header>Joining { !data ? "Game" : data.name }</Header>
+            <Loader active inline />
         </main>
     )
 }

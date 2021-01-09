@@ -1,8 +1,45 @@
 .container {
     padding: 8px;
+    max-width: 1200px;
 }
 
-.shareLink {
-    width: auto;
-    padding: 8px;
+.boardContainer {
+    margin-top: 16px;
+    padding: 16px;
+    background-color: white;
+    display: inline-block;
+}
+
+.controls {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.controls label {
+    display: flex;
+}
+
+.controls label > * {
+    margin-left: 8px;
+}
+
+.copyLabel {
+    opacity: 0;
+    transition: opacity ease-in-out 100ms !important;
+}
+
+.show {
+    opacity: 1;
+}
+
+.linkInput {
+    width: 400px;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+.lastNumber {
+    margin-left: auto;
 }

@@ -1,8 +1,11 @@
+import classnames from "classnames";
 import ky from "ky";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Button, Checkbox, Form, Header, Icon, Input, Label } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, Cell, NewBoard } from "../../../common/src/types/board";
+import { BingoGame, BoardParams, Cell, NewBoard } from "../../../common/src/types/board";
+import { pickRandomFrom } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
@@ -37,11 +40,14 @@ export function HostGameView() {
     const gameResourceUrl = `${config.backend}/games/${gameId}`;
     const joinableLink = `${window.location.origin}/game/${gameId}`;
     const [ trackingBoard, setTrackingBoard ] = useState<NewBoard | null>(null);
-    const linkInput = useRef<HTMLInputElement>(null);
+    const [ copyTooltip, setCopyTooltip ] = useState(false);
+    const [ manualPick, setManualPick ] = useState(false);
 
     const { data: gameData, error, isValidating, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
         ky.get(gameResourceUrl).json<BingoGame>()
     ));
+
+    const lastNumber = gameData?.calledNumbers[gameData.calledNumbers.length -1];
 
     useEffect(() => {
         if(gameData) {
@@ -50,13 +56,14 @@ export function HostGameView() {
     }, [gameData]);
 
     const onCopyVisitLink = () => {
-        linkInput.current!.select();
+        setCopyTooltip(true);
         navigator.clipboard.writeText(joinableLink)
             .then(console.log)
             .catch(console.error);
+        setTimeout(() => setCopyTooltip(false), 2000)
     }
 
-    const onSelectCell = async (_: number, __: number, selectedCell: Cell) => {
+    const onSelectCell = async (selectedCell: Cell) => {
         if(selectedCell.type === "free") {
             throw new Error("Only expected numbers to be picked");
         }
@@ -65,7 +72,9 @@ export function HostGameView() {
 
             const gameUpdate: BingoGame = { 
                 ...gameData,
-                calledNumbers: [...gameData.calledNumbers, selectedCell.number]
+                calledNumbers: !selectedCell.selected
+                    ? [...gameData.calledNumbers, selectedCell.number]
+                    : gameData.calledNumbers.filter(num => num !== selectedCell.number)
             }
             
             setTrackingBoard(formTrackingBoard(gameUpdate));
@@ -81,6 +90,18 @@ export function HostGameView() {
         }
     }
 
+    const onPickRandomCell = () => {
+        const availableCells: Cell[] = []
+        for(const cat of trackingBoard!.categories) {
+            for(const cell of cat) {
+                if(cell.type === "number" && !gameData!.calledNumbers.includes(cell.number)) {
+                    availableCells.push(cell);
+                }
+            }
+        }
+        onSelectCell(pickRandomFrom(availableCells));
+    }
+
     return (
         <main className={ styles.container }>
             { (isValidating && !gameData)
@@ -89,20 +110,79 @@ export function HostGameView() {
                     ? <h1>Error</h1>
                     : (
                         <>
-                            <h1>Hosting game { gameData.name } ({ gameData.boards.length } players)</h1>
-                            <p>Copy this link and share it with your friends</p>
-                            <input type="text" disabled className={ styles.shareLink }
-                                   size={ joinableLink.length }
-                                   value={ joinableLink }
-                                   ref={ linkInput } />
-                            <button onClick={ onCopyVisitLink }>Copy</button>
+                            <Header as="h1">
+                                Hosting "{ gameData.name }"
+                                <Label color="black"><Icon name="users" />{ gameData.boards.length } joined</Label>
+                            </Header>
+                            <Form.Field>
+                                <Input 
+                                    type="text" size="small"
+                                    className={ styles.linkInput }
+                                    value={ joinableLink }
+                                    action={{
+                                        color: "blue",
+                                        icon: "copy",
+                                        onClick: onCopyVisitLink
+                                    }} />
+                                <Label pointing="left" color="black" 
+                                       className={ classnames(styles.copyLabel, { [ styles.show ]: copyTooltip }) }>
+                                    Copied
+                                </Label>
+                            </Form.Field>
                             { !!trackingBoard && (
-                                <BingoBoard board={ trackingBoard } rowWise canSelect
-                                            onCellSelect={ onSelectCell } /> 
+                                <section className={ styles.boardContainer }>
+                                    <Form.Group widths="equal" className={ styles.controls }>
+                                        <label>Pick Manually
+                                            <Checkbox toggle
+                                                    checked={ manualPick } onChange={(_, e) => setManualPick(e.checked ?? false)} />
+                                        </label>
+                                        { !manualPick && (
+                                            <Button onClick={ onPickRandomCell }>Pick</Button>
+                                        )}
+                                        { lastNumber!== undefined && (
+                                            <LastNumberDisplay num={ lastNumber } 
+                                                               gameParams={ gameData.gameParams } />
+                                        ) }
+                                    </Form.Group>
+                                    <BingoBoard board={ trackingBoard } rowWise canSelect={ manualPick }
+                                                onCellSelect={ (_,__,cell) => onSelectCell(cell) } /> 
+                                </section>
                             )}
                         </>
                     )
             }
         </main>
+    )
+}
+
+interface LastNumberProps {
+    num: number;
+    gameParams: BoardParams;
+}
+function LastNumberDisplay({ num, gameParams }: LastNumberProps) {
+    const colors = [
+        'red',
+        'green',
+        'orange',
+        'violet',
+        'yellow',
+        'olive',
+        'teal',
+        'blue',
+        'purple',
+        'pink',
+        'brown',
+        'grey',
+        'black',
+      ];
+
+    const lastNumberCol = Math.floor(num / gameParams.maxNumber * gameParams.letters.length )
+    const letter = gameParams.letters[lastNumberCol];
+
+    return (
+        <div className={ styles.lastNumber }>
+            Last Picked:&nbsp;
+            <Label color={ colors[lastNumberCol % colors.length] as any }>{ letter } - { num }</Label>
+        </div>
     )
 }

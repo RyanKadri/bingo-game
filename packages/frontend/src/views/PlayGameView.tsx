@@ -1,6 +1,7 @@
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Header, Icon, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
 import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
 import { BingoBoard } from "../components/BingoBoard";
@@ -13,11 +14,11 @@ export function PlayGameView() {
     const gameUrl = `${config.backend}/games/${gameId}`;
     const boardUrl = `${config.backend}/boards/${boardId}`;
 
-    const gameRes = useSWR(gameUrl, () => (
+    const { data: gameData } = useSWR(gameUrl, () => (
         ky.get(gameUrl).json<BingoGame>()
     ));
 
-    const { data: boardData, error: boardError, isValidating: boardLoading } = useSWR(boardUrl, () => (
+    const { data: boardData } = useSWR(boardUrl, () => (
         ky.get(boardUrl).json<CreatedBoard>()
     ));
 
@@ -37,7 +38,7 @@ export function PlayGameView() {
                 categories: [...oldBoard.categories]
             };
             const cell = newBoard.categories[col][row];
-            cell.selected = true;
+            cell.selected = !cell.selected;
 
             try {
                 setBoard(newBoard);
@@ -53,25 +54,22 @@ export function PlayGameView() {
 
     return (
         <main className={ styles.container }>
-            { !gameRes.data && (gameRes.isValidating || boardLoading)
+            { (!gameData || !boardData)
                 ? <h1>Loading</h1>
-                : (gameRes.error || boardError || !board || !gameRes.data)
-                    ? <h1>Error</h1>
-                    : (
-                        <>
-                            <h1>Bingo XTreme</h1>
-                            <h2>Game: { gameRes.data.name }</h2>
-                            <h4>Players: { gameRes.data.boards.length }</h4>
-                            <p>As your caller picks numbers, click on board squares to mark them</p>
-                            <p>
-                                You have to keep an eye on your board to see if you won. The site won't
-                                detect it automatically. That's part of the fun of Bingo!
-                            </p>
-                            { !!board && (
-                                <BingoBoard board={ board } canSelect={true} onCellSelect={ onCellSelect } /> 
-                            )}
-                        </>
-                    )
+                : (
+                    <>
+                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.boards.length } playing</Label></Header>
+                        <Message info>
+                            <Message.List>
+                                <Message.Item>As your caller picks numbers, click on board squares to mark them</Message.Item>
+                                <Message.Item>Keep an eye on your board. The site won't detect Bingo. That's part of the fun</Message.Item>
+                            </Message.List>
+                        </Message>
+                        { !!board && (
+                            <BingoBoard board={ board } canSelect={true} onCellSelect={ onCellSelect } /> 
+                        )}
+                    </>
+                )
             }
         </main>
     )

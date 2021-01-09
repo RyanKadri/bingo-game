@@ -6,7 +6,7 @@ import { createBoard } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { config } from "../utils/config";
 import styles from "./CreateGameView.module.css";
-import sharedStyles from "./game-view.module.css";
+import { Header, Form } from "semantic-ui-react"
 
 const defaultGameName = "Bingo with Friends";
 
@@ -47,8 +47,8 @@ export function CreateGameView() {
         setMaxNumber(safeMax);
     }
 
-    const onUpdateFreeCenter = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFreeCenter(e.target.checked);
+    const onUpdateFreeCenter = (newVal: boolean) => {
+        setFreeCenter(newVal);
     }
 
     const onCreateGame = async () => {
@@ -67,39 +67,33 @@ export function CreateGameView() {
     }
 
     return (
-        <main className={ sharedStyles.container }>
-            <h1>Create a Bingo Game</h1>
-            <form className={ styles.boardParams }>
-                <label>Game Name:
-                    <input type="text"
-                           value={ gameName }
-                           onChange={ e => setGameName(e.target.value) } />
-                </label>
-                <label>Game Letters:
-                    <input type="text" 
-                        value={ gameLetters }
-                        onChange={ onUpdateLetters } />
-                </label>
-                <label>Maximum Number:
-                    <input type="number" value={ maxNumber } 
-                        step={ Math.max(gameLetters.length, 1) }
-                        onChange={ onUpdateMax } />
-                </label>
-                <label>Free Center:
-                    <input type="checkbox" 
-                           checked={ evenRows ? false : freeCenter }
-                           disabled={ evenRows }
-                           onChange={ onUpdateFreeCenter } />
-                </label>
-                <button onClick={ onCreateGame } type="button">
-                    Create Game
-                </button>
-            </form>
+        <main className={ styles.container }>
+            <section>
+                <Header as="h1">Create a Bingo Game</Header>
+                <Form>
+                    <Form.Input label="Game Name" type="text" 
+                                value={ gameName } onChange={ e => setGameName(e.target.value) }>
+                    </Form.Input>
+                    <Form.Input label="Board Letters" type="text"
+                                value={ gameLetters } onChange={ onUpdateLetters }/>
+                    <Form.Input label="Maximum Number" value={ maxNumber }
+                                step={ Math.max(gameLetters.length, 1 )}
+                                onChange={ onUpdateMax } />
+                    <Form.Checkbox label="Free Center" checked={ evenRows ? false : freeCenter }
+                            disabled={ evenRows }
+                            onChange={ (_, val) => onUpdateFreeCenter(val.checked ?? false) } />
+                    <Form.Button onClick={ onCreateGame } type="button" primary>
+                        Create Game
+                    </Form.Button>
+                </Form>
+            </section>
             { exampleBoard !== null && (
-                <>
-                    <h2>Sample Board</h2>
-                    <BingoBoard board={ exampleBoard } />
-                </>
+                <section>
+                    <Header as="h2">Sample Board</Header>
+                    <div className={ styles.boardBox }>
+                        <BingoBoard board={ exampleBoard } />
+                    </ div>
+                </section>
             )}
         </main>
     )

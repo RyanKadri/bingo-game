@@ -1,15 +1,18 @@
 import React from 'react';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import './App.css';
+import "semantic-ui-css/semantic.min.css"
 import { CreateGameView } from './views/CreateGameView';
 import { HostGameView } from './views/HostGameView';
 import { LandingInstructionsView } from './views/LandingInstructions';
 import { JoinGameView } from './views/JoinGameView';
 import { PlayGameView } from './views/PlayGameView';
-
+import { TopNav } from './components/TopNav';
+ 
 function App() {
   return (
     <BrowserRouter>
+      <TopNav></TopNav>
       <Switch>
         <Route exact path="/">
           <LandingInstructionsView />
