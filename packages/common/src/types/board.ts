@@ -4,6 +4,7 @@ export interface BingoGame {
     gameParams: BoardParams;
     calledNumbers: number[];
     boards: string[];
+    listeners?: string[];
 }
 
 export type NewBingoGame = Pick<BingoGame, "name" | "gameParams">;

@@ -11,7 +11,6 @@ export const createGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardParams: NewBingoGame = JSON.parse(e.body!);
 
     const newGame = await gameService.saveGame(boardParams);
-  
     return {
         statusCode: 200,
         body: JSON.stringify(newGame),
@@ -30,7 +29,7 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
 }
 
 export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
-    const boardUpdate: BingoGame = JSON.parse(e.body!)
+    const boardUpdate: Pick<BingoGame, "calledNumbers" | "id"> = JSON.parse(e.body!)
     const update = await gameService.updateGame(boardUpdate);
 
     return {

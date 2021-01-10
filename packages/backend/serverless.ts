@@ -16,7 +16,9 @@ const config: Serverless = {
     },
     iamManagedPolicies: [
       "arn:aws:iam::307651132348:policy/bingo-tables"
-    ]
+    ],
+    websocketsApiName: "bingo-websocket",
+    websocketsApiRouteSelectionExpression: "$request.body.event"
   },
   plugins: [
     "serverless-webpack",
@@ -78,7 +80,7 @@ const config: Serverless = {
         {
           httpApi: {
             path: "/games",
-            method: "put",
+            method: "patch",
           }
         }
       ]
@@ -93,6 +95,35 @@ const config: Serverless = {
             method: "get",
           }
         }
+      ]
+    },
+    connectionManager: {
+      handler: "src/game-events.handleConnection",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { websocket: { route: "$connect" } },
+        { websocket: { route: "$disconnect" }}
+      ]
+    },
+    handleBingo: {
+      handler: "src/game-events.handleBingo",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { websocket: { route: "bingo" }}
+      ]
+    },
+    handleSubscribe: {
+      handler: "src/game-events.handleGameSubscription",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { websocket: { route: "subscribe" }}
+      ]
+    },
+    handleUnsubscribe: {
+      handler: "src/game-events.handleGameUnsubscribe",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { websocket: { route: "unsubscribe" }}
       ]
     }
   },

@@ -30,13 +30,42 @@ export class GameService {
         return game;
     }
 
-    async updateGame(updatedBoard: BingoGame) {
-        await this.client.put({
+    async updateGame(updatedBoard: Pick<BingoGame, "id" | "calledNumbers">) {
+        await this.client.update({
             TableName: gameTable,
-            Item: updatedBoard
+            Key: { id: updatedBoard.id },
+            UpdateExpression: "set #calledNumbers = :numbers",
+            ExpressionAttributeNames: {
+              "#calledNumbers": "calledNumbers"
+            },
+            ExpressionAttributeValues: {
+              ":numbers": updatedBoard.calledNumbers
+            }
         }).promise();
 
         return updatedBoard;
+    }
+
+    async registerSubscription(gameId: string, connectionId: string) {
+        await this.client.update({
+            TableName: gameTable,
+            Key: { id: gameId },
+            UpdateExpression: "ADD listeners :connectionId",
+            ExpressionAttributeValues: {
+              ":connectionId": this.client.createSet([connectionId])
+            }
+        }).promise();
+    }
+
+    async unsubscribe(gameId: string, connectionId: string) {
+        await this.client.update({
+            TableName: gameTable,
+            Key: { id: gameId },
+            UpdateExpression: "DELETE listeners :connectionId",
+            ExpressionAttributeValues: {
+              ":connectionId": this.client.createSet([connectionId])
+            }
+        }).promise();
     }
 
     async fetchGame(boardId: string) {
@@ -47,7 +76,7 @@ export class GameService {
             }
         }).promise();
         
-        return resp.Item;
+        return resp.Item as BingoGame;
     }
 
     registerBoard(gameId: string, boardId: string) {

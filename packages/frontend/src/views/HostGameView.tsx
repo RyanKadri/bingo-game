@@ -81,8 +81,10 @@ export function HostGameView() {
             mutate(gameUpdate, false);
             
             try {
-                await ky.put(`${config.backend}/games`, {
-                    json: gameUpdate
+                await ky.patch(`${config.backend}/games`, {
+                    json: {
+                        calledNumbers: gameUpdate.calledNumbers
+                    }
                 }).json();
             } catch(e) {
                 setTrackingBoard(oldBoard)

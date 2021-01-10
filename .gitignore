@@ -2,3 +2,5 @@ node_modules
 .idea/
 infrastructure/.terraform
 terraform.tfstate.backup
+.eslintcache
+tempnotes

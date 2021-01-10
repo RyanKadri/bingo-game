@@ -11,7 +11,7 @@ export function TopNav() {
                     <Link to="/">Instructions</Link>
                 </li>
                 <li>
-                    <Link to="/create">Create</Link>
+                    <Link to="/game/create">Create</Link>
                 </li>
             </ul>
         </nav>
