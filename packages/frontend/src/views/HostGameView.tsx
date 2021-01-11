@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { BingoGame, BoardParams, Cell, NewBoard } from "../../../common/src/types/board";
 import { pickRandomFrom } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
+import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
 
@@ -34,7 +35,10 @@ function formTrackingBoard(gameInfo: BingoGame): NewBoard {
     }
 }
 
-export function HostGameView() {
+interface Props {
+    eventService: BingoEventService;
+}
+export function HostGameView({ eventService }: Props) {
 
     const { gameId } = useParams<{ gameId: string }>();
     const gameResourceUrl = `${config.backend}/games/${gameId}`;
@@ -103,6 +107,28 @@ export function HostGameView() {
         }
         onSelectCell(pickRandomFrom(availableCells));
     }
+
+    useEffect(() => {
+        eventService.connect()
+            .then(() => {
+                eventService.subscribeToGame(gameId, true);
+                eventService.onBingo(() => { console.log("Bingo!!!") });
+                eventService.onPlayerJoined(e => { 
+                    mutate(old => ({
+                        ...old!,
+                        listeners: (old!.listeners ?? []).concat(e.connectionId)
+                    })) 
+                });
+                eventService.onPlayerLeft(e => {
+                    mutate(old => ({
+                        ...old!,
+                        listeners: (old!.listeners ?? [])
+                            .filter(oldListener => oldListener !== e.connectionId)
+                    }))
+                })
+            })
+        return () => { eventService.disconnect() }
+    }, [ eventService, gameId, mutate ])
 
     return (
         <main className={ styles.container }>

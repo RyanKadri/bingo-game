@@ -8,7 +8,10 @@ import { LandingInstructionsView } from './views/LandingInstructions';
 import { JoinGameView } from './views/JoinGameView';
 import { PlayGameView } from './views/PlayGameView';
 import { TopNav } from './components/TopNav';
- 
+import { BingoEventService } from './services/websocket-events';
+
+const eventService = new BingoEventService();
+
 function App() {
   return (
     <BrowserRouter>
@@ -21,7 +24,7 @@ function App() {
           <CreateGameView />
         </Route>
         <Route path="/game/:gameId/host">
-          <HostGameView />
+          <HostGameView eventService={ eventService } />
         </Route>
         <Route exact path="/game/:gameId" render={ props => (
           <Redirect to={`/game/${props.match.params.gameId}/join`} />
@@ -31,7 +34,7 @@ function App() {
           <JoinGameView />
         </Route>
         <Route path="/game/:gameId/board/:boardId">
-          <PlayGameView />
+          <PlayGameView eventService={ eventService } />
         </Route>
       </Switch>
     </BrowserRouter>

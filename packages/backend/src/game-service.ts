@@ -46,15 +46,26 @@ export class GameService {
         return updatedBoard;
     }
 
-    async registerSubscription(gameId: string, connectionId: string) {
-        await this.client.update({
-            TableName: gameTable,
-            Key: { id: gameId },
-            UpdateExpression: "ADD listeners :connectionId",
-            ExpressionAttributeValues: {
-              ":connectionId": this.client.createSet([connectionId])
-            }
-        }).promise();
+    async registerSubscription(gameId: string, connectionId: string, asHost: boolean) {
+        if(asHost) {
+            await this.client.update({
+                TableName: gameTable,
+                Key: { id: gameId },
+                UpdateExpression: "ADD listeners :connectionId",
+                ExpressionAttributeValues: {
+                  ":connectionId": this.client.createSet([connectionId])
+                }
+            }).promise();
+        } else {
+            await this.client.update({
+                TableName: gameTable,
+                Key: { id: gameId },
+                UpdateExpression: "SET hostConnection = :hostConnection",
+                ExpressionAttributeValues: {
+                    ":hostConnection": connectionId
+                }
+            })
+        }
     }
 
     async unsubscribe(gameId: string, connectionId: string) {

@@ -5,10 +5,14 @@ import { Header, Icon, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
 import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
 import { BingoBoard } from "../components/BingoBoard";
+import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
 
-export function PlayGameView() {
+interface Props {
+    eventService: BingoEventService;
+}
+export function PlayGameView({ eventService }: Props) {
 
     const { gameId, boardId } = useParams<{ gameId: string, boardId: string }>();
     const gameUrl = `${config.backend}/games/${gameId}`;
@@ -28,7 +32,16 @@ export function PlayGameView() {
         if(boardData) {
             setBoard(boardData)
         }
-    }, [boardData]);
+    }, [ boardData ]);
+
+    useEffect(() => {
+        eventService.connect().then(() => {
+            eventService.subscribeToGame(gameId);
+        })
+        return () => { 
+            eventService.unsubscribe(gameId);
+        }
+    }, [ eventService, gameId ])
 
     const onCellSelect = async (col: number, row: number) => {
         if(boardData) {
