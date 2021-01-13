@@ -43,13 +43,11 @@ export function PlayGameView({ eventService, player }: Props) {
             eventService.connect().then(() => {
                 eventService.subscribeToGame(gameId, player.id, player.name);
             })
-            eventService.onCellCalled(e => {
-                mutateGameData(old => (!old ? old : { 
-                    ...old, 
-                    calledNumbers: old.calledNumbers.concat(e.call) }))
-            })
-            window.addEventListener("onbeforeunload", e => {
-                eventService.unsubscribe(gameId, player.id, player.name);
+            eventService.onGameSync(e => {
+                mutateGameData(old => ({ 
+                    ...old,
+                    ...e.game
+                }))
             })
             return () => { 
                 eventService.unsubscribe(gameId, player.id, player.name);

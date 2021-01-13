@@ -118,18 +118,11 @@ export function HostGameView({ eventService, player }: Props) {
                     eventService.onBingo((e) => { 
                         setBingoCallers(old => old.concat(e.calledBy));
                     });
-                    eventService.onPlayerJoined(e => { 
-                        mutate(old => (!old ? old : {
+                    eventService.onGameSync(e => {
+                        mutate(old => ({ 
                             ...old,
-                            playerNames: (old?.playerNames ?? []).concat(e.name)
-                        }));
-                    });
-                    eventService.onPlayerLeft(e => {
-                        mutate(old => (!old ? old : {
-                            ...old,
-                            playerNames: (old!.playerNames ?? [])
-                                .filter(oldPlayer => oldPlayer !== e.name)
-                        }));
+                            ...e.game
+                        }))
                     })
                 }
             });
@@ -201,7 +194,7 @@ export function HostGameView({ eventService, player }: Props) {
                                 <>
                                 <Header>Called Numbers</Header>
                                 <List>
-                                    { gameData.calledNumbers.map(num => (
+                                    { gameData.calledNumbers.slice().reverse().map(num => (
                                         <List.Item key={ num }>
                                             <CalledNumber num={ num } gameParams={ gameData.gameParams } />
                                         </List.Item>

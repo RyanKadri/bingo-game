@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BingoEvent, BingoGame, CallBingoCommand, CallCellCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/board";
+import { BingoEvent, BingoGame, CallBingoCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/board";
 import { useApiManagement, useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { PlayerService } from "./player-service";
@@ -11,13 +11,13 @@ const playerService = new PlayerService(client, gameService);
 export const handleGameSubscription: APIGatewayProxyHandlerV2 = async (e) => {
     const subscription: SubscribeCommand = JSON.parse(e.body!);
     const connectionId: string = (e.requestContext as any).connectionId
-    await gameService.registerSubscription(subscription.gameId, connectionId, subscription.playerId, subscription.playerName);
+    const updatedGame = await gameService.registerSubscription(subscription.gameId, connectionId, subscription.playerId, subscription.playerName);
     await playerService.watchGame(subscription.playerId, subscription.gameId);
 
     if(subscription.playerName) {
         await alertAllListeners(subscription.gameId, e.requestContext.apiId, {
-            event: "playerJoined",
-            name: subscription.playerName
+            event: "gameSync",
+            game: updatedGame
         })
     }
 
@@ -29,15 +29,13 @@ export const handleGameSubscription: APIGatewayProxyHandlerV2 = async (e) => {
 export const handleGameUnsubscribe: APIGatewayProxyHandlerV2 = async (e) => {
     const subscription: UnsubscribeCommand = JSON.parse(e.body!);
     const connectionId: string = (e.requestContext as any).connectionId
-    await gameService.unsubscribe(subscription.gameId, connectionId, subscription.playerId, subscription.playerName);
+    const game = await gameService.unsubscribe(subscription.gameId, connectionId, subscription.playerId, subscription.playerName);
     await playerService.unwatchGame(subscription.playerId, subscription.gameId);
 
-    if(subscription.playerName) {
-        await alertAllListeners(subscription.gameId, e.requestContext.apiId, {
-            event: "playerLeft",
-            name: subscription.playerName
-        });
-    }
+    await alertAllListeners(subscription.gameId, e.requestContext.apiId, {
+        event: "gameSync",
+        game: game
+    });
 
     return {
         statusCode: 200
@@ -57,18 +55,6 @@ export const handleBingo: APIGatewayProxyHandlerV2 = async (e) => {
     }
 }
 
-export const handleCallCell: APIGatewayProxyHandlerV2 = async (e) => {
-    const callCellEvent: CallCellCommand = JSON.parse(e.body!);
-    const game = await gameService.fetchGame(callCellEvent.gameId);
-    await alertAllListeners(game, e.requestContext.apiId, {
-        event: "cellCalled",
-        call: callCellEvent.call
-    })
-    return {
-        statusCode: 200
-    }
-}
-
 export async function alertAllListeners(gameOrId: string | BingoGame, apiId: string, event: BingoEvent) {
     const managementClient = useApiManagement(apiId);
     let game: BingoGame;
@@ -83,8 +69,8 @@ export async function alertAllListeners(gameOrId: string | BingoGame, apiId: str
             ConnectionId: listener,
             Data: JSON.stringify(event)
         }).promise()
-          .catch(() => {
-              // TODO should I unsubscribe here?
+          .catch((e) => {
+              console.error(`Connection: ${listener} failed: ${e.message}`)
            })
     )))
 }

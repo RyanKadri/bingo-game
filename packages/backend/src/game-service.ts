@@ -26,7 +26,7 @@ export class GameService {
     }
 
     async updateGame(updatedBoard: Pick<BingoGame, "id" | "calledNumbers">) {
-        await this.client.update({
+        const updated = await this.client.update({
             TableName: gameTable,
             Key: { id: updatedBoard.id },
             UpdateExpression: "set #calledNumbers = :numbers",
@@ -35,10 +35,11 @@ export class GameService {
             },
             ExpressionAttributeValues: {
               ":numbers": updatedBoard.calledNumbers
-            }
+            },
+            ReturnValues: "ALL_NEW"
         }).promise();
 
-        return updatedBoard;
+        return this.normalizeGame(updated.Attributes as BingoGame);
     }
 
     async registerSubscription(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
@@ -49,7 +50,7 @@ export class GameService {
         if(playerName) {
             toAdd.push("playerNames :playerName");
         }
-        await this.client.update({
+        const updateRes = await this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
             UpdateExpression: `ADD ${ toAdd.join(", ") }`,
@@ -57,8 +58,11 @@ export class GameService {
                 ":connectionId": this.client.createSet([connectionId]),
                 ":playerId": playerId ? this.client.createSet([playerId]) : undefined,
                 ":playerName": playerName ? this.client.createSet([playerName]) : undefined
-            }
+            },
+            ReturnValues: "ALL_NEW"
         }).promise();
+
+        return this.normalizeGame(updateRes.Attributes as BingoGame);
     }
 
     async unsubscribe(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
@@ -69,7 +73,7 @@ export class GameService {
         if(playerName) {
             toDelete.push("playerNames :playerName");
         }
-        await this.client.update({
+        const updateRes = await this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
             UpdateExpression: `DELETE ${ toDelete.join(", ") }`,
@@ -79,6 +83,8 @@ export class GameService {
               ":playerName": playerName ? this.client.createSet([playerName]) : undefined
             }
         }).promise();
+
+        return this.normalizeGame(updateRes.Attributes as BingoGame);
     }
 
     async fetchGame(boardId: string): Promise<BingoGame> {
@@ -91,16 +97,7 @@ export class GameService {
         
         const game = gameResp.Item as BingoGame;
 
-        const listeners: string[] = ((game.listeners as any)?.values ?? []).slice();
-        const playerIds: string[] = ((game.playerIds as any)?.values ?? []).slice();
-        const playerNames: string[] = ((game.playerNames as any)?.values ?? []).slice();
-
-        return {
-            ...game,
-            listeners,
-            playerIds,
-            playerNames
-        };
+        return this.normalizeGame(game);
     }
 
     registerBoard(gameId: string, boardId: string) {
@@ -112,5 +109,18 @@ export class GameService {
               ":boardId": [boardId]
             }
         }).promise()
+    }
+
+    private normalizeGame(game: BingoGame) {
+        const listeners: string[] = ((game.listeners as any)?.values ?? []).slice();
+        const playerIds: string[] = ((game.playerIds as any)?.values ?? []).slice();
+        const playerNames: string[] = ((game.playerNames as any)?.values ?? []).slice();
+
+        return {
+            ...game,
+            listeners,
+            playerIds,
+            playerNames
+        };
     }
 }

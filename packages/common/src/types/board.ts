@@ -50,7 +50,7 @@ export interface Player extends NewPlayer {
     id: string;
 }
 
-export type BingoCommand = SubscribeCommand | UnsubscribeCommand | CallBingoCommand | RegisterPlayerConnection | CallCellCommand;
+export type BingoCommand = SubscribeCommand | UnsubscribeCommand | CallBingoCommand | RegisterPlayerConnection;
 
 export interface SubscribeCommand {
     event: "subscribe";
@@ -79,13 +79,7 @@ export interface RegisterPlayerConnection {
     playerId: string;
 }
 
-export interface CallCellCommand {
-    event: "callCell";
-    gameId: string;
-    call: number;
-}
-
-export type BingoEvent = BingoCalled | HostJoined | PlayerJoined | PlayerLeft | CellCalled;
+export type BingoEvent = BingoCalled | HostJoined | PlayerJoined | PlayerLeft | GameSync;
 
 export interface BingoCalled {
     event: "bingo";
@@ -107,7 +101,7 @@ export interface PlayerLeft {
     name: string;
 }
 
-export interface CellCalled {
-    event: "cellCalled";
-    call: number;
+export interface GameSync {
+    event: "gameSync";
+    game: BingoGame
 }

@@ -1,4 +1,4 @@
-import { BingoCalled, BingoCommand, BingoEvent, CellCalled, PlayerJoined } from "../../../common/src/types/board";
+import { BingoCalled, BingoCommand, BingoEvent, GameSync, PlayerJoined } from "../../../common/src/types/board";
 
 export class BingoEventService {
     
@@ -62,18 +62,14 @@ export class BingoEventService {
         this.sendCommand({ event: "bingo", gameId, calledBy: playerName })
     }
 
-    callCell(gameId: string, call: number) {
-        this.sendCommand({ event: "callCell", gameId, call })
-    }
-
     onBingo(cb: (e: BingoCalled) => void) {
         const oldHandlers = this.eventHandlers.get("bingo") ?? [];
         this.eventHandlers.set("bingo", [...oldHandlers, cb as any]);
     }
 
-    onCellCalled(cb: (e: CellCalled) => void) {
-        const oldHandlers = this.eventHandlers.get("cellCalled") ?? [];
-        this.eventHandlers.set("cellCalled", [...oldHandlers, cb as any]);
+    onGameSync(cb: (e: GameSync) => void) {
+        const oldHandlers = this.eventHandlers.get("gameSync") ?? [];
+        this.eventHandlers.set("gameSync", [...oldHandlers, cb as any]);
     }
 
     onPlayerJoined(cb: (e: PlayerJoined) => void) {

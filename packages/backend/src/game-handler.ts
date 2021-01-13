@@ -32,10 +32,11 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
 export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardUpdate: Pick<BingoGame, "calledNumbers" | "id"> = JSON.parse(e.body!)
     const update = await gameService.updateGame(boardUpdate);
-    await alertAllListeners(boardUpdate.id, e.requestContext.apiId, {
-        event: "cellCalled",
-        call: boardUpdate.calledNumbers[boardUpdate.calledNumbers.length - 1]
-    })
+    //TODO: ENV Var
+    await alertAllListeners(boardUpdate.id, "btbl61pij6", {
+        event: "gameSync",
+        game: update
+    });
 
     return {
         statusCode: 200,
