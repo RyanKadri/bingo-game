@@ -1,34 +1,41 @@
 import { BingoCalled, BingoCommand, BingoEvent, PlayerJoined } from "../../../common/src/types/board";
 
 export class BingoEventService {
+    
     private ws: WebSocket | null = null;
     private initializingWs: WebSocket | null = null;
     private eventHandlers = new Map<BingoEvent["event"], ((e: BingoEvent) => void)[]>()
+    private connectPromise: Promise<void> | null = null;
 
     connect() {
-        this.initializingWs = new WebSocket(`${process.env.REACT_APP_BINGO_WEBSOCKET}`);
-        
-        this.initializingWs.addEventListener("close", () => {
-            console.log("WebSocket closed");
-            this.ws = null;
-        });
-
-        this.initializingWs.addEventListener("message", (e) => {
-            const event: BingoEvent = JSON.parse(e.data);
-            const handlers = this.eventHandlers.get(event.event) ?? [];
-            handlers.forEach(handler => {
-                handler(event);
-            })
-        });
-
-        return new Promise<void>((res) => {
-            this.initializingWs!.addEventListener("open", () => {
-                console.log("WebSocket connected");
-                this.ws = this.initializingWs;
-                this.initializingWs = null;
-                res();
+        if(!!this.connectPromise) {
+            return this.connectPromise;
+        } else {
+            this.initializingWs = new WebSocket(`${process.env.REACT_APP_BINGO_WEBSOCKET}`);
+            
+            this.initializingWs.addEventListener("close", () => {
+                console.log("WebSocket closed");
+                this.ws = null;
             });
-        });
+
+            this.initializingWs.addEventListener("message", (e) => {
+                const event: BingoEvent = JSON.parse(e.data);
+                const handlers = this.eventHandlers.get(event.event) ?? [];
+                handlers.forEach(handler => {
+                    handler(event);
+                })
+            });
+
+            this.connectPromise = new Promise<void>((res) => {
+                this.initializingWs!.addEventListener("open", () => {
+                    console.log("WebSocket connected");
+                    this.ws = this.initializingWs;
+                    this.initializingWs = null;
+                    res();
+                });
+            });
+            return this.connectPromise;
+        }
     }
 
     disconnect() {
@@ -39,12 +46,20 @@ export class BingoEventService {
         }
     }
 
-    subscribeToGame(gameId: string, asHost = false) {
-        this.sendCommand({ event: "subscribe", gameId, asHost });
+    registerPlayer(playerId: string) {
+        this.sendCommand({ event: "registerConnection", playerId })
     }
 
-    unsubscribe(gameId: string) {
-        this.sendCommand({ event: "unsubscribe", gameId })
+    subscribeToGame(gameId: string, playerId: string, playerName: string, asHost = false) {
+        this.sendCommand({ event: "subscribe", gameId, playerId, playerName, asHost });
+    }
+
+    unsubscribe(gameId: string, playerId: string, playerName: string, asHost = false) {
+        this.sendCommand({ event: "unsubscribe", gameId, playerId, playerName, asHost })
+    }
+
+    callBingo(gameId: string, playerId: string, playerName: string) {
+        this.sendCommand({ event: "bingo", gameId, calledBy: playerName })
     }
 
     onBingo(cb: (e: BingoCalled) => void) {

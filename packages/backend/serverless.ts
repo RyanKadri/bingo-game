@@ -2,7 +2,8 @@ import { Serverless } from "serverless/aws";
 
 const dynamoEnvironment = {
   BINGO_GAME_DYNAMO_TABLE: "${ssm:bingo-game-table}",
-  BINGO_BOARD_DYNAMO_TABLE: "${ssm:bingo-board-table}"
+  BINGO_BOARD_DYNAMO_TABLE: "${ssm:bingo-board-table}",
+  BINGO_PLAYER_DYNAMO_TABLE: "${ssm:bingo-player-table}"
 };
 
 const config: Serverless = {
@@ -97,11 +98,41 @@ const config: Serverless = {
         }
       ]
     },
-    connectionManager: {
-      handler: "src/game-events.handleConnection",
+    fetchPlayer: {
+      handler: "src/player-handler.fetchPlayer",
       environment: { ...dynamoEnvironment },
       events: [
+        { 
+          httpApi: {
+            path: "/players/{playerId}",
+            method: "get"
+          }
+        }
+      ]
+    },
+    savePlayer: {
+      handler: "src/player-handler.updatePlayer",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { 
+          httpApi: {
+            path: "/players",
+            method: "put"
+          }
+        }
+      ]
+    },
+    connectManager: {
+      handler: "src/player-handler.connectWebSocket",
+      environment: { ... dynamoEnvironment },
+      events: [
         { websocket: { route: "$connect" } },
+      ]
+    },
+    connectionManager: {
+      handler: "src/player-handler.disconnectPlayer",
+      environment: { ...dynamoEnvironment },
+      events: [
         { websocket: { route: "$disconnect" }}
       ]
     },
@@ -124,6 +155,13 @@ const config: Serverless = {
       environment: { ...dynamoEnvironment },
       events: [
         { websocket: { route: "unsubscribe" }}
+      ]
+    },
+    connectPlayer: {
+      handler: "src/player-handler.connectPlayer",
+      environment: { ...dynamoEnvironment },
+      events: [
+        { websocket: {route: "registerConnection" }}
       ]
     }
   },

@@ -30,7 +30,9 @@ data "aws_iam_policy_document" "bingo-tables" {
     ]
     resources = [
       aws_dynamodb_table.board-table.arn,
-      aws_dynamodb_table.game-table.arn
+      aws_dynamodb_table.game-table.arn,
+      aws_dynamodb_table.player-table.arn,
+      "${aws_dynamodb_table.player-table.arn}/index/*"
     ]
   }
 }

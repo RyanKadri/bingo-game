@@ -1,18 +1,20 @@
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Header, Icon, Label, Message } from "semantic-ui-react";
+import { Button, Header, Icon, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
+import { BingoGame, CreatedBoard, Player } from "../../../common/src/types/board";
 import { BingoBoard } from "../components/BingoBoard";
 import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
 
+const bingoTimeout = 2000; 
 interface Props {
     eventService: BingoEventService;
+    player?: Player;
 }
-export function PlayGameView({ eventService }: Props) {
+export function PlayGameView({ eventService, player }: Props) {
 
     const { gameId, boardId } = useParams<{ gameId: string, boardId: string }>();
     const gameUrl = `${config.backend}/games/${gameId}`;
@@ -27,6 +29,7 @@ export function PlayGameView({ eventService }: Props) {
     ));
 
     const [ board, setBoard ] = useState<CreatedBoard | null>(null);
+    const [ bingoDisabled, setBingoDisabled ] = useState(false);
 
     useEffect(() => {
         if(boardData) {
@@ -35,13 +38,18 @@ export function PlayGameView({ eventService }: Props) {
     }, [ boardData ]);
 
     useEffect(() => {
-        eventService.connect().then(() => {
-            eventService.subscribeToGame(gameId);
-        })
-        return () => { 
-            eventService.unsubscribe(gameId);
+        if(player) {
+            eventService.connect().then(() => {
+                eventService.subscribeToGame(gameId, player.id, player.name);
+            })
+            window.addEventListener("onbeforeunload", e => {
+                eventService.unsubscribe(gameId, player.id, player.name);
+            })
+            return () => { 
+                eventService.unsubscribe(gameId, player.id, player.name);
+            }
         }
-    }, [ eventService, gameId ])
+    }, [ eventService, gameId, player ])
 
     const onCellSelect = async (col: number, row: number) => {
         if(boardData) {
@@ -65,13 +73,23 @@ export function PlayGameView({ eventService }: Props) {
         }
     }
 
+    const onCallBingo = () => {
+        if(player) {
+            eventService.callBingo(gameId, player.id, player.name);
+            setBingoDisabled(true);
+            setTimeout(() => {
+                setBingoDisabled(false);
+            }, bingoTimeout)
+        }
+    }
+
     return (
         <main className={ styles.container }>
             { (!gameData || !boardData)
                 ? <h1>Loading</h1>
                 : (
                     <>
-                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.boards.length } playing</Label></Header>
+                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.playerNames } playing</Label></Header>
                         <Message info>
                             <Message.List>
                                 <Message.Item>As your caller picks numbers, click on board squares to mark them</Message.Item>
@@ -79,7 +97,13 @@ export function PlayGameView({ eventService }: Props) {
                             </Message.List>
                         </Message>
                         { !!board && (
-                            <BingoBoard board={ board } canSelect={true} onCellSelect={ onCellSelect } /> 
+                            <>
+                            <BingoBoard board={ board } canSelect={true} className={ styles.bingoBoard }
+                                        onCellSelect={ onCellSelect } /> 
+                            <Button color="red" onClick={ onCallBingo } disabled={ bingoDisabled }>
+                                Call Bingo
+                            </Button>
+                            </>
                         )}
                     </>
                 )

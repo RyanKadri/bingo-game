@@ -1,0 +1,9 @@
+[build]
+  publish = "packages/frontend/build"
+  command = "npm run build:frontend"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

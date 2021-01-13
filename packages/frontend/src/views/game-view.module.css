@@ -43,3 +43,12 @@
 .lastNumber {
     margin-left: auto;
 }
+
+.bingoBoard {
+    margin-bottom: 1em;
+}
+
+.bingoCallerList {
+    max-height: 200px;
+    overflow: auto;
+}

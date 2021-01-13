@@ -2,9 +2,9 @@ import classnames from "classnames";
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Checkbox, Form, Header, Icon, Input, Label } from "semantic-ui-react";
+import { Button, Checkbox, Form, Header, Icon, Input, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, BoardParams, Cell, NewBoard } from "../../../common/src/types/board";
+import { BingoGame, BoardParams, Cell, NewBoard, Player } from "../../../common/src/types/board";
 import { pickRandomFrom } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { BingoEventService } from "../services/websocket-events";
@@ -37,8 +37,9 @@ function formTrackingBoard(gameInfo: BingoGame): NewBoard {
 
 interface Props {
     eventService: BingoEventService;
+    player?: Player;
 }
-export function HostGameView({ eventService }: Props) {
+export function HostGameView({ eventService, player }: Props) {
 
     const { gameId } = useParams<{ gameId: string }>();
     const gameResourceUrl = `${config.backend}/games/${gameId}`;
@@ -46,12 +47,15 @@ export function HostGameView({ eventService }: Props) {
     const [ trackingBoard, setTrackingBoard ] = useState<NewBoard | null>(null);
     const [ copyTooltip, setCopyTooltip ] = useState(false);
     const [ manualPick, setManualPick ] = useState(false);
+    const [ bingoCallers, setBingoCallers ] = useState<string[]>([]);
 
     const { data: gameData, error, isValidating, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
         ky.get(gameResourceUrl).json<BingoGame>()
     ));
 
-    const lastNumber = gameData?.calledNumbers[gameData.calledNumbers.length -1];
+    const lastNumber = gameData?.calledNumbers
+        ? gameData.calledNumbers[gameData.calledNumbers.length -1]
+        : undefined;
 
     useEffect(() => {
         if(gameData) {
@@ -87,6 +91,7 @@ export function HostGameView({ eventService }: Props) {
             try {
                 await ky.patch(`${config.backend}/games`, {
                     json: {
+                        id: gameId,
                         calledNumbers: gameUpdate.calledNumbers
                     }
                 }).json();
@@ -111,24 +116,32 @@ export function HostGameView({ eventService }: Props) {
     useEffect(() => {
         eventService.connect()
             .then(() => {
-                eventService.subscribeToGame(gameId, true);
-                eventService.onBingo(() => { console.log("Bingo!!!") });
-                eventService.onPlayerJoined(e => { 
-                    mutate(old => ({
-                        ...old!,
-                        listeners: (old!.listeners ?? []).concat(e.connectionId)
-                    })) 
-                });
-                eventService.onPlayerLeft(e => {
-                    mutate(old => ({
-                        ...old!,
-                        listeners: (old!.listeners ?? [])
-                            .filter(oldListener => oldListener !== e.connectionId)
-                    }))
-                })
-            })
-        return () => { eventService.disconnect() }
-    }, [ eventService, gameId, mutate ])
+                if(player) {
+                    eventService.subscribeToGame(gameId, player.id, player.name, true);
+                    eventService.onBingo((e) => { 
+                        setBingoCallers(old => old.concat(e.calledBy));
+                    });
+                    eventService.onPlayerJoined(e => { 
+                        mutate(old => (!old ? old : {
+                            ...old,
+                            playerNames: (old?.playerNames ?? []).concat(e.name)
+                        }));
+                    });
+                    eventService.onPlayerLeft(e => {
+                        mutate(old => (!old ? old : {
+                            ...old,
+                            playerNames: (old!.playerNames ?? [])
+                                .filter(oldPlayer => oldPlayer !== e.name)
+                        }));
+                    })
+                }
+            });
+        return () => { 
+            if(player) {
+                eventService.unsubscribe(gameId, player.id, player.name) 
+            }
+        }
+    }, [ eventService, gameId, mutate, player ])
 
     return (
         <main className={ styles.container }>
@@ -140,7 +153,7 @@ export function HostGameView({ eventService }: Props) {
                         <>
                             <Header as="h1">
                                 Hosting "{ gameData.name }"
-                                <Label color="black"><Icon name="users" />{ gameData.boards.length } joined</Label>
+                                <Label color="black"><Icon name="users" />{ (gameData.playerNames ?? []).length } playing</Label>
                             </Header>
                             <Form.Field>
                                 <Input 
@@ -157,6 +170,18 @@ export function HostGameView({ eventService }: Props) {
                                     Copied
                                 </Label>
                             </Form.Field>
+                            { bingoCallers.length > 0 && (
+                                <Message>
+                                    <Message.Header>
+                                        Bingo! { bingoCallers[0] } and { bingoCallers.length - 1 } other(s) called Bingo
+                                    </Message.Header>
+                                    <Message.List className={ styles.bingoCallerList }>
+                                        { bingoCallers.map((caller, i) => (
+                                            <Message.Item key={ caller + i }>{ caller }</Message.Item>
+                                        )) }
+                                    </Message.List>
+                                </Message>
+                            )}
                             { !!trackingBoard && (
                                 <section className={ styles.boardContainer }>
                                     <Form.Group widths="equal" className={ styles.controls }>

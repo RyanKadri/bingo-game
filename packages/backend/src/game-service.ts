@@ -1,12 +1,7 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { BingoGame, NewBingoGame } from "../../common/src/types/board";
-import { assertExists } from "../../common/src/utils/utils";
+import { gameTable } from "./utils/config";
 import { shortUID } from "./utils/utils";
-
-const gameTable = assertExists(
-    process.env.BINGO_GAME_DYNAMO_TABLE,
-    "Expected game table to be set"
-);
 
 export class GameService {
     constructor(
@@ -46,58 +41,73 @@ export class GameService {
         return updatedBoard;
     }
 
-    async registerSubscription(gameId: string, connectionId: string, asHost: boolean) {
-        if(asHost) {
-            await this.client.update({
-                TableName: gameTable,
-                Key: { id: gameId },
-                UpdateExpression: "ADD listeners :connectionId",
-                ExpressionAttributeValues: {
-                  ":connectionId": this.client.createSet([connectionId])
-                }
-            }).promise();
-        } else {
-            await this.client.update({
-                TableName: gameTable,
-                Key: { id: gameId },
-                UpdateExpression: "SET hostConnection = :hostConnection",
-                ExpressionAttributeValues: {
-                    ":hostConnection": connectionId
-                }
-            })
+    async registerSubscription(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
+        const toAdd = ["listeners :connectionId"];
+        if(playerId) {
+            toAdd.push("playerIds :playerId");
         }
-    }
-
-    async unsubscribe(gameId: string, connectionId: string) {
+        if(playerName) {
+            toAdd.push("playerNames :playerName");
+        }
         await this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
-            UpdateExpression: "DELETE listeners :connectionId",
+            UpdateExpression: `ADD ${ toAdd.join(", ") }`,
             ExpressionAttributeValues: {
-              ":connectionId": this.client.createSet([connectionId])
+                ":connectionId": this.client.createSet([connectionId]),
+                ":playerId": playerId ? this.client.createSet([playerId]) : undefined,
+                ":playerName": playerName ? this.client.createSet([playerName]) : undefined
             }
         }).promise();
     }
 
-    async fetchGame(boardId: string) {
-        const resp = await this.client.get({
+    async unsubscribe(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
+        const toDelete = ["listeners :connectionId"];
+        if(playerId) {
+            toDelete.push("playerIds :playerId");
+        }
+        if(playerName) {
+            toDelete.push("playerNames :playerName");
+        }
+        await this.client.update({
+            TableName: gameTable,
+            Key: { id: gameId },
+            UpdateExpression: `DELETE ${ toDelete.join(", ") }`,
+            ExpressionAttributeValues: {
+              ":connectionId": this.client.createSet([connectionId]),
+              ":playerId": playerId ? this.client.createSet([playerId]) : undefined,
+              ":playerName": playerName ? this.client.createSet([playerName]) : undefined
+            }
+        }).promise();
+    }
+
+    async fetchGame(boardId: string): Promise<BingoGame> {
+        const gameResp = await this.client.get({
             TableName: gameTable,
             Key: {
                 id: boardId
             }
         }).promise();
         
-        return resp.Item as BingoGame;
+        const game = gameResp.Item as BingoGame;
+
+        const listeners: string[] = ((game.listeners as any)?.values ?? []).slice();
+        const playerIds: string[] = ((game.playerIds as any)?.values ?? []).slice();
+        const playerNames: string[] = ((game.playerNames as any)?.values ?? []).slice();
+
+        return {
+            ...game,
+            listeners,
+            playerIds,
+            playerNames
+        };
     }
 
     registerBoard(gameId: string, boardId: string) {
         return this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
-            UpdateExpression: "set #boards = list_append(#boards, :boardId)",
-            ExpressionAttributeNames: {
-              "#boards": "boards"
-            },
+            UpdateExpression: "set boards = list_append(boards, :boardId)",
             ExpressionAttributeValues: {
               ":boardId": [boardId]
             }

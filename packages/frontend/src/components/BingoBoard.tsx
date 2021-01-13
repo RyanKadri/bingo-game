@@ -7,25 +7,27 @@ interface Props {
     board: NewBoard;
     canSelect?: boolean;
     rowWise?: boolean;
-    onCellSelect?: (col: number, row: number, cell: Cell) => void
+    onCellSelect?: (col: number, row: number, cell: Cell) => void;
+    className?: string;
 }
 
 interface DefaultedProps {
     board: NewBoard;
     canSelect: boolean;
-    onCellSelect: (col: number, row: number, cell: Cell) => void
+    onCellSelect: (col: number, row: number, cell: Cell) => void;
 }
 
 export function BingoBoard({ 
     board, 
     canSelect = false, 
     onCellSelect = noop, 
-    rowWise = false
+    rowWise = false,
+    className = "",
 }: Props) {
 
     const selectHandler = canSelect ? onCellSelect : noop;
     return (
-        <section>
+        <section className={ className }>
             <table className={ c(styles.boardTable, { [styles.selectable]: canSelect, [styles.rowWise]: rowWise }) }>
                 { rowWise
                     ? <HorizontalBoard board={ board } canSelect={ canSelect } onCellSelect={ selectHandler } />

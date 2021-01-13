@@ -6,6 +6,8 @@
     align-items: center;
     background-color: #2185d0;
     color: white;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .topNav header {
@@ -34,4 +36,8 @@
 
 .topNav a:hover {
     background-color: rgba(255,255,255,0.11);
+}
+
+.nameForm {
+    margin-left: auto;
 }

@@ -4,7 +4,8 @@ export interface BingoGame {
     gameParams: BoardParams;
     calledNumbers: number[];
     boards: string[];
-    hostConnection?: string;
+    playerIds?: string[];
+    playerNames?: string[];
     listeners?: string[];
 }
 
@@ -39,33 +40,55 @@ interface NumberCell {
     selected: boolean;
 }
 
-export type BingoCommand = SubscribeCommand | UnsubscribeCommand | CallBingoCommand;
+export interface NewPlayer {
+    name: string;
+    connectionId: string;
+    games: string[];
+}
+
+export interface Player extends NewPlayer {
+    id: string;
+}
+
+export type BingoCommand = SubscribeCommand | UnsubscribeCommand | CallBingoCommand | RegisterPlayerConnection;
 
 export interface SubscribeCommand {
     event: "subscribe";
     gameId: string;
+    playerId: string;
+    playerName: string;
     asHost: boolean;
 }
 
 export interface UnsubscribeCommand {
     event: "unsubscribe";
     gameId: string;
+    playerId: string;
+    playerName: string;
+    asHost: boolean;
 }
 
 export interface CallBingoCommand {
     event: "bingo";
     gameId: string;
+    calledBy: string;
+}
+
+export interface RegisterPlayerConnection {
+    event: "registerConnection";
+    playerId: string;
 }
 
 export type BingoEvent = BingoCalled | HostJoined | PlayerJoined | PlayerLeft;
 
 export interface BingoCalled {
     event: "bingo";
+    calledBy: string;
 }
 
 export interface PlayerJoined {
     event: "playerJoined";
-    connectionId: string;
+    name: string;
 }
 
 export interface HostJoined {
@@ -75,5 +98,5 @@ export interface HostJoined {
 
 export interface PlayerLeft {
     event: "playerLeft";
-    connectionId: string;
+    name: string;
 }
