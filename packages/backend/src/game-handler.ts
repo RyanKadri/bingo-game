@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
 import { BingoGame, NewBingoGame } from "../../common/src/types/board";
 import { useClient } from "./dynamoClient";
+import { alertAllListeners } from "./game-events";
 import { GameService } from "./game-service";
 import { withCors } from "./utils/utils";
 
@@ -31,6 +32,10 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
 export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardUpdate: Pick<BingoGame, "calledNumbers" | "id"> = JSON.parse(e.body!)
     const update = await gameService.updateGame(boardUpdate);
+    await alertAllListeners(boardUpdate.id, e.requestContext.apiId, {
+        event: "cellCalled",
+        call: boardUpdate.calledNumbers[boardUpdate.calledNumbers.length - 1]
+    })
 
     return {
         statusCode: 200,

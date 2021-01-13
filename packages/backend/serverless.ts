@@ -23,7 +23,6 @@ const config: Serverless = {
   },
   plugins: [
     "serverless-webpack",
-    // "serverless-domain-manager"
   ],
   functions: {
     generateBoard: {
@@ -163,7 +162,7 @@ const config: Serverless = {
       events: [
         { websocket: {route: "registerConnection" }}
       ]
-    }
+    },
   },
   custom: {
     webpack: {

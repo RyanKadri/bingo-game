@@ -5,6 +5,7 @@ import { Button, Header, Icon, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
 import { BingoGame, CreatedBoard, Player } from "../../../common/src/types/board";
 import { BingoBoard } from "../components/BingoBoard";
+import { LastNumberDisplay } from "../components/LastNumberDisplay";
 import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
@@ -20,7 +21,7 @@ export function PlayGameView({ eventService, player }: Props) {
     const gameUrl = `${config.backend}/games/${gameId}`;
     const boardUrl = `${config.backend}/boards/${boardId}`;
 
-    const { data: gameData } = useSWR(gameUrl, () => (
+    const { data: gameData, mutate: mutateGameData } = useSWR(gameUrl, () => (
         ky.get(gameUrl).json<BingoGame>()
     ));
 
@@ -42,6 +43,11 @@ export function PlayGameView({ eventService, player }: Props) {
             eventService.connect().then(() => {
                 eventService.subscribeToGame(gameId, player.id, player.name);
             })
+            eventService.onCellCalled(e => {
+                mutateGameData(old => (!old ? old : { 
+                    ...old, 
+                    calledNumbers: old.calledNumbers.concat(e.call) }))
+            })
             window.addEventListener("onbeforeunload", e => {
                 eventService.unsubscribe(gameId, player.id, player.name);
             })
@@ -49,7 +55,7 @@ export function PlayGameView({ eventService, player }: Props) {
                 eventService.unsubscribe(gameId, player.id, player.name);
             }
         }
-    }, [ eventService, gameId, player ])
+    }, [ eventService, gameId, player, mutateGameData ])
 
     const onCellSelect = async (col: number, row: number) => {
         if(boardData) {
@@ -89,21 +95,27 @@ export function PlayGameView({ eventService, player }: Props) {
                 ? <h1>Loading</h1>
                 : (
                     <>
-                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.playerNames } playing</Label></Header>
+                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.playerNames?.length ?? 0 } playing</Label></Header>
                         <Message info>
                             <Message.List>
                                 <Message.Item>As your caller picks numbers, click on board squares to mark them</Message.Item>
                                 <Message.Item>Keep an eye on your board. The site won't detect Bingo. That's part of the fun</Message.Item>
                             </Message.List>
                         </Message>
-                        { !!board && (
-                            <>
-                            <BingoBoard board={ board } canSelect={true} className={ styles.bingoBoard }
-                                        onCellSelect={ onCellSelect } /> 
+                        <header className={ styles.gameInfo }>
+                            <div>
+                                <span>{ gameData.calledNumbers.length } number(s) called</span>
+                                <LastNumberDisplay gameData={ gameData} />
+                            </div>
                             <Button color="red" onClick={ onCallBingo } disabled={ bingoDisabled }>
                                 Call Bingo
                             </Button>
-                            </>
+                        </header>
+                        { !!board && (
+                            <section className={ styles.boardContainer }>
+                                <BingoBoard board={ board } canSelect={true} className={ styles.bingoBoard }
+                                            onCellSelect={ onCellSelect } /> 
+                            </section>
                         )}
                     </>
                 )

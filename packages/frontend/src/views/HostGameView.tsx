@@ -2,11 +2,12 @@ import classnames from "classnames";
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Checkbox, Form, Header, Icon, Input, Label, Message } from "semantic-ui-react";
+import { Button, Checkbox, Form, Header, Icon, Input, Label, List, Message } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, BoardParams, Cell, NewBoard, Player } from "../../../common/src/types/board";
+import { BingoGame, Cell, NewBoard, Player } from "../../../common/src/types/board";
 import { pickRandomFrom } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
+import { CalledNumber, LastNumberDisplay } from "../components/LastNumberDisplay";
 import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
 import styles from "./game-view.module.css";
@@ -49,13 +50,9 @@ export function HostGameView({ eventService, player }: Props) {
     const [ manualPick, setManualPick ] = useState(false);
     const [ bingoCallers, setBingoCallers ] = useState<string[]>([]);
 
-    const { data: gameData, error, isValidating, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
+    const { data: gameData, error, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
         ky.get(gameResourceUrl).json<BingoGame>()
     ));
-
-    const lastNumber = gameData?.calledNumbers
-        ? gameData.calledNumbers[gameData.calledNumbers.length -1]
-        : undefined;
 
     useEffect(() => {
         if(gameData) {
@@ -145,15 +142,15 @@ export function HostGameView({ eventService, player }: Props) {
 
     return (
         <main className={ styles.container }>
-            { (isValidating && !gameData)
-                ? <h1>Loading</h1>
-                : (error || !gameData)
+            { (!gameData && !error)
+                ? <Header>Loading</Header>
+                : (!gameData && error)
                     ? <h1>Error</h1>
                     : (
                         <>
                             <Header as="h1">
-                                Hosting "{ gameData.name }"
-                                <Label color="black"><Icon name="users" />{ (gameData.playerNames ?? []).length } playing</Label>
+                                Hosting "{ gameData!.name }"
+                                <Label color="black"><Icon name="users" />{ (gameData!.playerNames ?? []).length } playing</Label>
                             </Header>
                             <Form.Field>
                                 <Input 
@@ -192,50 +189,29 @@ export function HostGameView({ eventService, player }: Props) {
                                         { !manualPick && (
                                             <Button onClick={ onPickRandomCell }>Pick</Button>
                                         )}
-                                        { lastNumber!== undefined && (
-                                            <LastNumberDisplay num={ lastNumber } 
-                                                               gameParams={ gameData.gameParams } />
+                                        { gameData && (
+                                            <LastNumberDisplay gameData={ gameData } />
                                         ) }
                                     </Form.Group>
                                     <BingoBoard board={ trackingBoard } rowWise canSelect={ manualPick }
                                                 onCellSelect={ (_,__,cell) => onSelectCell(cell) } /> 
                                 </section>
                             )}
+                            { gameData?.calledNumbers && (
+                                <>
+                                <Header>Called Numbers</Header>
+                                <List>
+                                    { gameData.calledNumbers.map(num => (
+                                        <List.Item key={ num }>
+                                            <CalledNumber num={ num } gameParams={ gameData.gameParams } />
+                                        </List.Item>
+                                    ))}
+                                </List>
+                                </>
+                            )}
                         </>
                     )
             }
         </main>
-    )
-}
-
-interface LastNumberProps {
-    num: number;
-    gameParams: BoardParams;
-}
-function LastNumberDisplay({ num, gameParams }: LastNumberProps) {
-    const colors = [
-        'red',
-        'green',
-        'orange',
-        'violet',
-        'yellow',
-        'olive',
-        'teal',
-        'blue',
-        'purple',
-        'pink',
-        'brown',
-        'grey',
-        'black',
-      ];
-
-    const lastNumberCol = Math.floor(num / gameParams.maxNumber * gameParams.letters.length )
-    const letter = gameParams.letters[lastNumberCol];
-
-    return (
-        <div className={ styles.lastNumber }>
-            Last Picked:&nbsp;
-            <Label color={ colors[lastNumberCol % colors.length] as any }>{ letter } - { num }</Label>
-        </div>
     )
 }

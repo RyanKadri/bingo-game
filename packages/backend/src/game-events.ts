@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BingoEvent, BingoGame, CallBingoCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/board";
+import { BingoEvent, BingoGame, CallBingoCommand, CallCellCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/board";
 import { useApiManagement, useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { PlayerService } from "./player-service";
@@ -57,7 +57,19 @@ export const handleBingo: APIGatewayProxyHandlerV2 = async (e) => {
     }
 }
 
-async function alertAllListeners(gameOrId: string | BingoGame, apiId: string, event: BingoEvent) {
+export const handleCallCell: APIGatewayProxyHandlerV2 = async (e) => {
+    const callCellEvent: CallCellCommand = JSON.parse(e.body!);
+    const game = await gameService.fetchGame(callCellEvent.gameId);
+    await alertAllListeners(game, e.requestContext.apiId, {
+        event: "cellCalled",
+        call: callCellEvent.call
+    })
+    return {
+        statusCode: 200
+    }
+}
+
+export async function alertAllListeners(gameOrId: string | BingoGame, apiId: string, event: BingoEvent) {
     const managementClient = useApiManagement(apiId);
     let game: BingoGame;
     if(typeof gameOrId === "string") {
