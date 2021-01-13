@@ -5,6 +5,7 @@
 }
 
 .signInBox {
+    width: 100%;
     max-width: 600px;
     padding: 16px;
     background-color: white;
@@ -15,4 +16,10 @@
 .note {
     display: block;
     margin: 1em 0;
+}
+
+@media (max-width: 500px) {
+    .container {
+        padding: 16px;
+    }
 }

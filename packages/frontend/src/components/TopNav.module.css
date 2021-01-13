@@ -8,6 +8,8 @@
     color: white;
     width: 100%;
     box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .topNav header {

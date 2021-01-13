@@ -6,7 +6,7 @@ import { createBoard } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { config } from "../utils/config";
 import styles from "./CreateGameView.module.css";
-import { Header, Form } from "semantic-ui-react"
+import { Header, Form, Divider } from "semantic-ui-react"
 
 const defaultGameName = "Bingo with Friends";
 
@@ -87,6 +87,7 @@ export function CreateGameView() {
                     </Form.Button>
                 </Form>
             </section>
+            <Divider className={ styles.divider }></Divider>
             { exampleBoard !== null && (
                 <section>
                     <Header as="h2">Sample Board</Header>
