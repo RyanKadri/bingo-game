@@ -45,8 +45,8 @@ function VerticalBoard({ board, onCellSelect}: DefaultedProps) {
         <>
         <thead>
             <tr>
-                { board.letters.split("").map(letter => (
-                    <th key={letter}>{ letter }</th>
+                { board.letters.split("").map((letter, i) => (
+                    <th key={letter + i}>{ letter }</th>
                 )) }
             </tr>
         </thead>

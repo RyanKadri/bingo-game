@@ -46,6 +46,8 @@ export function assertExists<T>(thing: T | null | undefined, message: string): T
 
 export function transposeCells(board: NewBoard): Cell[][] {
     const rows: Cell[][] = [];
+    if(board.categories.length === 0) { return rows }
+    
     for(let rowNum = 0; rowNum < board.categories[0].length; rowNum ++) {
         const row: Cell[] = [];
         for(const col of board.categories) {

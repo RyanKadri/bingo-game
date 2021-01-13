@@ -76,7 +76,7 @@ export function CreateGameView() {
                     </Form.Input>
                     <Form.Input label="Board Letters" type="text"
                                 value={ gameLetters } onChange={ onUpdateLetters }/>
-                    <Form.Input label="Maximum Number" value={ maxNumber }
+                    <Form.Input label="Maximum Number" value={ maxNumber } type="number"
                                 step={ Math.max(gameLetters.length, 1 )}
                                 onChange={ onUpdateMax } />
                     <Form.Checkbox label="Free Center" checked={ evenRows ? false : freeCenter }
