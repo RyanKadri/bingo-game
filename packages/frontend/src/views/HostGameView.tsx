@@ -2,7 +2,7 @@ import classnames from "classnames";
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Checkbox, Form, Header, Icon, Input, Label, List, Message } from "semantic-ui-react";
+import { Button, Form, Header, Icon, Input, Label, List, Message } from "semantic-ui-react";
 import useSWR from "swr";
 import { BingoGame, Cell, NewBoard, Player } from "../../../common/src/types/board";
 import { pickRandomFrom } from "../../../common/src/utils/utils";
@@ -47,7 +47,6 @@ export function HostGameView({ eventService, player }: Props) {
     const joinableLink = `${window.location.origin}/game/${gameId}`;
     const [ trackingBoard, setTrackingBoard ] = useState<NewBoard | null>(null);
     const [ copyTooltip, setCopyTooltip ] = useState(false);
-    const [ manualPick, setManualPick ] = useState(false);
     const [ bingoCallers, setBingoCallers ] = useState<string[]>([]);
 
     const { data: gameData, error, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
@@ -175,18 +174,16 @@ export function HostGameView({ eventService, player }: Props) {
                             { !!trackingBoard && (
                                 <section className={ styles.boardContainer }>
                                     <Form.Group widths="equal" className={ styles.controls }>
-                                        <label>Pick Manually
+                                        {/* <label>Pick Manually
                                             <Checkbox toggle
                                                     checked={ manualPick } onChange={(_, e) => setManualPick(e.checked ?? false)} />
-                                        </label>
-                                        { !manualPick && (
-                                            <Button onClick={ onPickRandomCell }>Pick</Button>
-                                        )}
+                                        </label> */}
+                                        <Button onClick={ onPickRandomCell }>Next Number</Button>
                                         { gameData && (
                                             <LastNumberDisplay gameData={ gameData } />
                                         ) }
                                     </Form.Group>
-                                    <BingoBoard board={ trackingBoard } rowWise canSelect={ manualPick }
+                                    <BingoBoard board={ trackingBoard } rowWise canSelect={ false }
                                                 onCellSelect={ (_,__,cell) => onSelectCell(cell) } /> 
                                 </section>
                             )}

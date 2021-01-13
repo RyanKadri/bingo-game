@@ -29,6 +29,9 @@ export function SignInView({ onUpdatePlayer }: Props) {
                     </Message>
                     <Form.Input label="Name" value={ playerName } 
                         onChange={(_, e) => setPlayerName(e.value)} />
+                    <em className={ styles.note }>
+                        Note: You may want to use your full name so the host can identify you
+                    </em>
                     <Form.Button primary>Start Playing</Form.Button>
                 </Form>
             </div>

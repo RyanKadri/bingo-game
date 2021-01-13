@@ -23,11 +23,14 @@
     border-right-width: 3px;
 }
 
-.selectable tbody td:hover {
-    background-color: rgba(0,0,0,0.15);
+.selectable tbody td:not(.selected):hover {
+    background-color: rgba(0,0,0,0.10);
+}
+
+.selectable tbody td {
     cursor: pointer;
 }
 
 .selected {
-    background-color: rgba(10,10,90, 0.15);
+    background-color: hsl(206 73% 47% / 0.5);
 }

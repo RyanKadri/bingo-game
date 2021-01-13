@@ -29,7 +29,7 @@ export function LandingInstructionsView() {
                             <Message.Item>Wait for the link from your caller</Message.Item>
                             <Message.Item>When you click the link, your Bingo card(s) will be generated for you</Message.Item>
                             <Message.Item>Click on the squares on the board to mark them</Message.Item>
-                            <Message.Item>The game will not detect Bingo for you. Keep an eye on your board and call Bingo when you are done!</Message.Item>
+                            <Message.Item>The game will not detect Bingo for you. Keep an eye on your board!</Message.Item>
                         </Message.List>
                     </Message>
                 </Card.Content>
