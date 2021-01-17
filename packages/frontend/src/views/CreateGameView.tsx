@@ -17,6 +17,7 @@ function defaultMaxNumber(numLetters: number) {
 export function CreateGameView() {
     const [ gameLetters, setGameLetters ] = useState("BINGO");
     const [ maxNumber, setMaxNumber ] = useState(defaultMaxNumber(gameLetters.length));
+    const [ safeMax, setSafeMax ] = useState(maxNumber);
     const [ freeCenter, setFreeCenter ] = useState(true);
     const [ gameName, setGameName ] = useState("");
 
@@ -29,21 +30,28 @@ export function CreateGameView() {
             createBoard({
                 letters: gameLetters, 
                 rows: gameLetters.length,
-                maxNumber, 
+                maxNumber: safeMax, 
                 freeCenter: evenRows ? false : freeCenter
             })
         );
-    }, [gameLetters, maxNumber, freeCenter, evenRows])
+    }, [gameLetters, safeMax, freeCenter, evenRows])
 
     const onUpdateLetters = (e: React.ChangeEvent<HTMLInputElement>) => {
         const nextVal = e.target.value;
         setGameLetters(nextVal.toUpperCase());
-        setMaxNumber(defaultMaxNumber(nextVal.length));
+        const newMax = defaultMaxNumber(nextVal.length);
+        setMaxNumber(newMax);
+        setSafeMax(newMax);
     }
 
     const onUpdateMax = (e: React.ChangeEvent<HTMLInputElement>) => {
         const enteredNum = e.target.valueAsNumber;
         const safeMax = Math.round(enteredNum / gameLetters.length) * gameLetters.length;
+        setMaxNumber(enteredNum);
+        setSafeMax(safeMax);
+    }
+
+    const roundMax = () => {
         setMaxNumber(safeMax);
     }
 
@@ -76,8 +84,11 @@ export function CreateGameView() {
                     </Form.Input>
                     <Form.Input label="Board Letters" type="text"
                                 value={ gameLetters } onChange={ onUpdateLetters }/>
-                    <Form.Input label="Maximum Number" value={ maxNumber } type="number"
+                    <Form.Input label="Maximum Number" type="number"
+                                value={ maxNumber }
+                                min={ gameLetters.length ** 2 * 2 }
                                 step={ Math.max(gameLetters.length, 1 )}
+                                onBlur={ roundMax }
                                 onChange={ onUpdateMax } />
                     <Form.Checkbox label="Free Center" checked={ evenRows ? false : freeCenter }
                             disabled={ evenRows }

@@ -3,7 +3,8 @@ import { Serverless } from "serverless/aws";
 const dynamoEnvironment = {
   BINGO_GAME_DYNAMO_TABLE: "${ssm:bingo-game-table}",
   BINGO_BOARD_DYNAMO_TABLE: "${ssm:bingo-board-table}",
-  BINGO_PLAYER_DYNAMO_TABLE: "${ssm:bingo-player-table}"
+  BINGO_PLAYER_DYNAMO_TABLE: "${ssm:bingo-player-table}",
+  WEBSOCKET_BACKEND_ID: { "Ref": "WebsocketsApi" }
 };
 
 const config: Serverless = {

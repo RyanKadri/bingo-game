@@ -4,6 +4,7 @@ import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import "semantic-ui-css/semantic.min.css";
 import { Player } from '../../common/src/types/board';
 import './App.css';
+import { GAWrapper } from './components/Analytics';
 import { TopNav } from './components/TopNav';
 import { BingoEventService } from './services/websocket-events';
 import { config } from './utils/config';
@@ -55,40 +56,42 @@ function App() {
 
   return (
     <BrowserRouter>
-      { hasPlayer && <TopNav onUpdatePlayer={ onUpdatePlayer } player={ player } /> }
-      { !hasPlayer && (
-        <Switch>
-          <Route path="/sign-in">
-            <SignInView onUpdatePlayer={ onUpdatePlayer } />
-          </Route>
-          <Route path="/">
-            <Redirect to={{ pathname:"/sign-in", search: `target=${window.location.pathname}` }} />
-          </Route>
-        </Switch>
-      ) }
-      { hasPlayer && (
-        <Switch>
-          <Route exact path="/">
-            <LandingInstructionsView />
-          </Route>
-          <Route path="/game/create">
-            <CreateGameView />
-          </Route>
-          <Route path="/game/:gameId/host">
-            <HostGameView eventService={ eventService } player={ player } />
-          </Route>
-          <Route exact path="/game/:gameId" render={ props => (
-            <Redirect to={`/game/${props.match.params.gameId}/join`} />
-          )}>
-          </Route>
-          <Route path="/game/:gameId/join">
-            <JoinGameView />
-          </Route>
-          <Route path="/game/:gameId/board/:boardId">
-            <PlayGameView eventService={ eventService } player={ player } />
-          </Route>
-        </Switch>
-      )}
+      <GAWrapper>
+        { hasPlayer && <TopNav onUpdatePlayer={ onUpdatePlayer } player={ player } /> }
+        { !hasPlayer && (
+          <Switch>
+            <Route path="/sign-in">
+              <SignInView onUpdatePlayer={ onUpdatePlayer } />
+            </Route>
+            <Route path="/">
+              <Redirect to={{ pathname:"/sign-in", search: `target=${window.location.pathname}` }} />
+            </Route>
+          </Switch>
+        ) }
+        { hasPlayer && (
+          <Switch>
+            <Route exact path="/">
+              <LandingInstructionsView />
+            </Route>
+            <Route path="/game/create">
+              <CreateGameView />
+            </Route>
+            <Route path="/game/:gameId/host">
+              <HostGameView eventService={ eventService } player={ player } />
+            </Route>
+            <Route exact path="/game/:gameId" render={ props => (
+              <Redirect to={`/game/${props.match.params.gameId}/join`} />
+            )}>
+            </Route>
+            <Route path="/game/:gameId/join">
+              <JoinGameView />
+            </Route>
+            <Route path="/game/:gameId/board/:boardId">
+              <PlayGameView eventService={ eventService } player={ player } />
+            </Route>
+          </Switch>
+        )}
+      </GAWrapper>
     </BrowserRouter>
   );
 }

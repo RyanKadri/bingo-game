@@ -32,8 +32,9 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
 export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardUpdate: Pick<BingoGame, "calledNumbers" | "id"> = JSON.parse(e.body!)
     const update = await gameService.updateGame(boardUpdate);
-    //TODO: ENV Var
-    await alertAllListeners(boardUpdate.id, "btbl61pij6", {
+    
+    const websocketBackend = process.env.WEBSOCKET_BACKEND_ID;
+    await alertAllListeners(boardUpdate.id, websocketBackend ?? "<unknown>", {
         event: "gameSync",
         game: update
     });
