@@ -2,8 +2,8 @@ resource "aws_dynamodb_table" "game-table" {
   hash_key = "id"
   name = "bingo-games"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = 15
+  read_capacity = 15
   attribute {
     name = "id"
     type = "S"
@@ -14,8 +14,8 @@ resource "aws_dynamodb_table" "board-table" {
   hash_key = "id"
   name = "bingo-boards"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = 15
+  read_capacity = 15
   attribute {
     name = "id"
     type = "S"
@@ -26,8 +26,8 @@ resource "aws_dynamodb_table" "player-table" {
   hash_key = "id"
   name = "bingo-players"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = 15
+  read_capacity = 15
   attribute {
     name = "id"
     type = "S"
@@ -41,8 +41,8 @@ resource "aws_dynamodb_table" "player-table" {
     range_key = "id"
     name = "bingo-players-by-connection"
     projection_type = "ALL"
-    write_capacity = 5
-    read_capacity = 5
+    write_capacity = 15
+    read_capacity = 15
   }
 }
 

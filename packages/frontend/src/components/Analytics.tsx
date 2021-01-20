@@ -9,7 +9,7 @@ export function GAWrapper({ children }: Props) {
     const history = useHistory();
 
     useEffect(() => {
-        ReactGA.initialize("G-70RYJ5Y3NT");
+        ReactGA.initialize("UA-146806194-3");
         ReactGA.pageview(window.location.pathname);
         history.listen(entry => ReactGA.pageview(entry.pathname));
     }, [ history ])
