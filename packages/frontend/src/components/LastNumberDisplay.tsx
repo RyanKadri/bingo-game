@@ -39,7 +39,7 @@ export function CalledNumber({ num, gameParams }: CalledNumberProps) {
         'black',
     ];
 
-    const numberCol = Math.floor(num / gameParams.maxNumber * gameParams.letters.length )
+    const numberCol = Math.floor((num - 1) * gameParams.letters.length / gameParams.maxNumber)
     const letter = gameParams.letters[numberCol];
 
     return (
