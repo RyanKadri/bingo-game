@@ -8,6 +8,9 @@ resource "aws_dynamodb_table" "game-table" {
     name = "id"
     type = "S"
   }
+  lifecycle {
+    ignore_changes = [write_capacity, read_capacity]
+  }
 }
 
 resource "aws_dynamodb_table" "board-table" {
@@ -19,6 +22,9 @@ resource "aws_dynamodb_table" "board-table" {
   attribute {
     name = "id"
     type = "S"
+  }
+  lifecycle {
+    ignore_changes = [write_capacity, read_capacity]
   }
 }
 
@@ -43,6 +49,9 @@ resource "aws_dynamodb_table" "player-table" {
     projection_type = "ALL"
     write_capacity = 15
     read_capacity = 15
+  }
+  lifecycle {
+    ignore_changes = [write_capacity, read_capacity]
   }
 }
 
