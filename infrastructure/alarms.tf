@@ -1,7 +1,3 @@
-resource "aws_sns_topic" "bingo-alarms" {
-
-}
-
 resource "aws_cloudwatch_metric_alarm" "board-table-capacity" {
   alarm_name = "bingo-table-capacity"
   comparison_operator = "GreaterThanOrEqualToThreshold"
