@@ -1,6 +1,6 @@
 import React from "react";
 import { Label } from "semantic-ui-react";
-import { BingoGame, BoardParams } from "../../../common/src/types/board";
+import { BingoGame, BoardParams } from "../../../common/src/types/types";
 import styles from "./LastNumberDisplay.module.css"
 
 interface Props {

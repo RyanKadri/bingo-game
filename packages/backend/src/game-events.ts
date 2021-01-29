@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BingoEvent, BingoGame, CallBingoCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/board";
+import { BingoCall, BingoEvent, BingoGame, CallBingoCommand, SubscribeCommand, UnsubscribeCommand } from "../../common/src/types/types";
 import { useApiManagement, useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { PlayerService } from "./player-service";
@@ -44,10 +44,15 @@ export const handleGameUnsubscribe: APIGatewayProxyHandlerV2 = async (e) => {
 
 export const handleBingo: APIGatewayProxyHandlerV2 = async (e) => {
     const bingoEvent: CallBingoCommand = JSON.parse(e.body!);
-    const game = await gameService.fetchGame(bingoEvent.gameId);
-    await alertAllListeners(game, e.requestContext.apiId, {
-        event: "bingo",
-        calledBy: bingoEvent.calledBy
+    const bingoCall: BingoCall = {
+        ...bingoEvent.call,
+        callTime: Date.now()
+    };
+
+    const gameUpdate = await gameService.registerBingo(bingoEvent.gameId, bingoCall);
+    await alertAllListeners(bingoEvent.gameId, e.requestContext.apiId, {
+        event: "gameSync",
+        game: gameUpdate
     });
 
     return {

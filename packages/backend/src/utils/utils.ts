@@ -18,3 +18,16 @@ export function shortUID() {
         .replace(/=/g, "-")
         .replace(/\+/g, "_")
 }
+
+export const infoDelimiter = "::";
+export function bundlePlayerInfo(playerName: string, playerId: string) {
+    return `${playerName}${infoDelimiter}${playerId}`
+}
+
+export function unbundlePlayerInfo(playerInfo: string) {
+    const [name, id] = playerInfo.split(infoDelimiter);
+    return {
+        name,
+        id
+    }
+}

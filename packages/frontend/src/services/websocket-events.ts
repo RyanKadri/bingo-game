@@ -1,4 +1,5 @@
-import { BingoCalled, BingoCommand, BingoEvent, GameSync, PlayerJoined } from "../../../common/src/types/board";
+import { BingoCalled, BingoCommand, BingoEvent, GameSync, PlayerJoined } from "../../../common/src/types/types";
+import { config } from "../utils/config";
 
 export class BingoEventService {
     
@@ -11,11 +12,13 @@ export class BingoEventService {
         if(!!this.connectPromise) {
             return this.connectPromise;
         } else {
-            this.initializingWs = new WebSocket(`${process.env.REACT_APP_BINGO_WEBSOCKET}`);
+            this.initializingWs = new WebSocket(config.websocket);
             
             this.initializingWs.addEventListener("close", () => {
                 console.log("WebSocket closed");
                 this.ws = null;
+                this.initializingWs = null;
+                this.connectPromise = null;
             });
 
             this.initializingWs.addEventListener("message", (e) => {
@@ -58,8 +61,15 @@ export class BingoEventService {
         this.sendCommand({ event: "unsubscribe", gameId, playerId, playerName, asHost })
     }
 
-    callBingo(gameId: string, playerId: string, playerName: string) {
-        this.sendCommand({ event: "bingo", gameId, calledBy: playerName })
+    callBingo(gameId: string, boardId: string, playerId: string, playerName: string) {
+        this.sendCommand({ 
+            event: "bingo", 
+            gameId, 
+            call: {
+                boardId,
+                playerId,
+                playerName
+            } })
     }
 
     onBingo(cb: (e: BingoCalled) => void) {

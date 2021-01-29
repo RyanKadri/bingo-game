@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BoardParams, CreatedBoard } from "../../common/src/types/board";
+import { BoardParams, CreatedBoard } from "../../common/src/types/types";
 import { createBoard } from "../../common/src/utils/utils";
 import { BoardService } from "./board-service";
 import { useClient } from "./dynamoClient";

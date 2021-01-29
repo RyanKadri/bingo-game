@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Icon, Input } from "semantic-ui-react";
-import { Player } from "../../../common/src/types/board";
+import { Player } from "../../../common/src/types/types";
 import styles from "./TopNav.module.css";
 
 interface Props {

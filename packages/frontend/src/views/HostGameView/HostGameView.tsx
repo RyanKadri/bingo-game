@@ -1,16 +1,19 @@
-import classnames from "classnames";
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Button, Form, Header, Icon, Input, Label, List, Message } from "semantic-ui-react";
+import { Button, Form, Header } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, Cell, NewBoard, Player } from "../../../common/src/types/board";
-import { pickRandomFrom } from "../../../common/src/utils/utils";
-import { BingoBoard } from "../components/BingoBoard";
-import { CalledNumber, LastNumberDisplay } from "../components/LastNumberDisplay";
-import { BingoEventService } from "../services/websocket-events";
-import { config } from "../utils/config";
-import styles from "./game-view.module.css";
+import { BingoGame, Cell, NewBoard, Player } from "../../../../common/src/types/types";
+import { pickRandomFrom } from "../../../../common/src/utils/utils";
+import { BingoBoard } from "../../components/BingoBoard";
+import { GamePlayersLabel } from "../../components/GamePlayersLabel";
+import { LastNumberDisplay } from "../../components/LastNumberDisplay";
+import { BingoEventService } from "../../services/websocket-events";
+import { config } from "../../utils/config";
+import styles from "../game-view.module.css";
+import { BingoAlert } from "./BingoAlert";
+import { CallHistory } from "./CallHistory";
+import { JoinGameLink } from "./JoinGameLink";
 
 function formTrackingBoard(gameInfo: BingoGame): NewBoard {
     const columns: Cell[][] = [];
@@ -44,10 +47,8 @@ export function HostGameView({ eventService, player }: Props) {
 
     const { gameId } = useParams<{ gameId: string }>();
     const gameResourceUrl = `${config.backend}/games/${gameId}`;
-    const joinableLink = `${window.location.origin}/game/${gameId}`;
+    
     const [ trackingBoard, setTrackingBoard ] = useState<NewBoard | null>(null);
-    const [ copyTooltip, setCopyTooltip ] = useState(false);
-    const [ bingoCallers, setBingoCallers ] = useState<string[]>([]);
 
     const { data: gameData, error, mutate } = useSWR<BingoGame>(gameResourceUrl, () => (
         ky.get(gameResourceUrl).json<BingoGame>()
@@ -58,14 +59,6 @@ export function HostGameView({ eventService, player }: Props) {
             setTrackingBoard(formTrackingBoard(gameData))
         }
     }, [gameData]);
-
-    const onCopyVisitLink = () => {
-        setCopyTooltip(true);
-        navigator.clipboard.writeText(joinableLink)
-            .then(console.log)
-            .catch(console.error);
-        setTimeout(() => setCopyTooltip(false), 2000)
-    }
 
     const onSelectCell = async (selectedCell: Cell) => {
         if(selectedCell.type === "free") {
@@ -114,14 +107,17 @@ export function HostGameView({ eventService, player }: Props) {
             .then(() => {
                 if(player) {
                     eventService.subscribeToGame(gameId, player.id, player.name, true);
-                    eventService.onBingo((e) => { 
-                        setBingoCallers(old => old.concat(e.calledBy));
-                    });
                     eventService.onGameSync(e => {
-                        mutate(old => ({ 
-                            ...old,
-                            ...e.game
-                        }))
+                        if(e.game.id === gameId) {
+                            mutate(old => {
+                                if(old) {
+                                    return {
+                                        ...old,
+                                        ...e.game
+                                    }
+                                }
+                            });
+                        }
                     })
                 }
             });
@@ -142,42 +138,15 @@ export function HostGameView({ eventService, player }: Props) {
                         <>
                             <Header as="h1">
                                 Hosting "{ gameData!.name }"
-                                <Label color="black"><Icon name="users" />{ (gameData!.playerNames ?? []).length } playing</Label>
+                                <GamePlayersLabel players={ gameData?.players ?? [] } />
                             </Header>
-                            <Form.Field>
-                                <Input 
-                                    type="text" size="small"
-                                    className={ styles.linkInput }
-                                    value={ joinableLink }
-                                    action={{
-                                        color: "blue",
-                                        icon: "copy",
-                                        onClick: onCopyVisitLink
-                                    }} />
-                                <Label pointing="left" color="black" 
-                                       className={ classnames(styles.copyLabel, { [ styles.show ]: copyTooltip }) }>
-                                    Copied
-                                </Label>
-                            </Form.Field>
-                            { bingoCallers.length > 0 && (
-                                <Message>
-                                    <Message.Header>
-                                        Bingo! { bingoCallers[0] } and { bingoCallers.length - 1 } other(s) called Bingo
-                                    </Message.Header>
-                                    <Message.List className={ styles.bingoCallerList }>
-                                        { bingoCallers.map((caller, i) => (
-                                            <Message.Item key={ caller + i }>{ caller }</Message.Item>
-                                        )) }
-                                    </Message.List>
-                                </Message>
+                            <JoinGameLink gameId={ gameId }></JoinGameLink>
+                            { gameData && gameData.bingoCalls.length > 0 && (
+                                <BingoAlert bingoCalls={ gameData.bingoCalls } />
                             )}
                             { !!trackingBoard && (
                                 <section className={ styles.boardContainer }>
                                     <Form.Group widths="equal" className={ styles.controls }>
-                                        {/* <label>Pick Manually
-                                            <Checkbox toggle
-                                                    checked={ manualPick } onChange={(_, e) => setManualPick(e.checked ?? false)} />
-                                        </label> */}
                                         <Button onClick={ onPickRandomCell }>Next Number</Button>
                                         { gameData && (
                                             <LastNumberDisplay gameData={ gameData } />
@@ -187,17 +156,8 @@ export function HostGameView({ eventService, player }: Props) {
                                                 onCellSelect={ (_,__,cell) => onSelectCell(cell) } /> 
                                 </section>
                             )}
-                            { gameData?.calledNumbers && (
-                                <>
-                                <Header>Called Numbers</Header>
-                                <List>
-                                    { gameData.calledNumbers.slice().reverse().map(num => (
-                                        <List.Item key={ num }>
-                                            <CalledNumber num={ num } gameParams={ gameData.gameParams } />
-                                        </List.Item>
-                                    ))}
-                                </List>
-                                </>
+                            { (gameData?.calledNumbers && gameData.calledNumbers.length > 0) && (
+                                <CallHistory calledNumbers={ gameData.calledNumbers } gameParams={ gameData.gameParams }/>
                             )}
                         </>
                     )

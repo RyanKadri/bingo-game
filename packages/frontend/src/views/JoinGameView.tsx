@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import { Header, Loader } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, CreatedBoard } from "../../../common/src/types/board";
+import { BingoGame, CreatedBoard } from "../../../common/src/types/types";
 import { config } from "../utils/config";
 import sharedStyles from "./game-view.module.css";
 

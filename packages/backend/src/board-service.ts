@@ -1,5 +1,5 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { CreatedBoard, NewBoard } from "../../common/src/types/board";
+import { CreatedBoard, NewBoard } from "../../common/src/types/types";
 import { boardTable } from "./utils/config";
 
 export class BoardService {

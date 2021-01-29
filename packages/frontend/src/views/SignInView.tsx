@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { Form, Header, Message } from "semantic-ui-react";
-import { Player } from "../../../common/src/types/board";
+import { Player } from "../../../common/src/types/types";
 import styles from "./SignInView.module.css";
 
 interface Props {

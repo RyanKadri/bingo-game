@@ -1,0 +1,14 @@
+.copyLabel {
+    opacity: 0;
+    transition: opacity ease-in-out 100ms !important;
+}
+
+.show {
+    opacity: 1;
+}
+
+.linkInput {
+    width: calc(100% - 80px);
+    max-width: 400px;
+    text-overflow: ellipsis;
+}

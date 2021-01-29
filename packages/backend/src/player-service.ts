@@ -1,6 +1,6 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { v4 } from "uuid";
-import { NewPlayer, Player } from "../../common/src/types/board";
+import { NewPlayer, Player } from "../../common/src/types/types";
 import { GameService } from "./game-service";
 import { playerTable } from "./utils/config";
 
@@ -43,7 +43,7 @@ export class PlayerService {
     async disconnectPlayer(connectionId: string) {
         const player = await this.fetchPlayerByConnection(connectionId);
         await Promise.all(player.games.map(game => 
-            this.gameService.unsubscribe(game, connectionId)
+            this.gameService.unsubscribe(game, connectionId, player.id, player.name)
         ));
         await this.client.update({
             TableName: playerTable,

@@ -1,12 +1,20 @@
 export interface BingoGame {
     id: string;
+    createdDate: number;
     name: string;
     gameParams: BoardParams;
     calledNumbers: number[];
     boards: string[];
-    playerIds?: string[];
-    playerNames?: string[];
+    players: Pick<Player, "id" | "name">[];
     listeners?: string[];
+    bingoCalls: BingoCall[];
+}
+
+export interface BingoCall {
+    playerName: string;
+    playerId: string;
+    boardId: string;
+    callTime: number;
 }
 
 export type NewBingoGame = Pick<BingoGame, "name" | "gameParams">;
@@ -71,7 +79,7 @@ export interface UnsubscribeCommand {
 export interface CallBingoCommand {
     event: "bingo";
     gameId: string;
-    calledBy: string;
+    call: Omit<BingoCall, "callTime">;
 }
 
 export interface RegisterPlayerConnection {
@@ -83,7 +91,7 @@ export type BingoEvent = BingoCalled | HostJoined | PlayerJoined | PlayerLeft | 
 
 export interface BingoCalled {
     event: "bingo";
-    calledBy: string;
+    call: BingoCall;
 }
 
 export interface PlayerJoined {
@@ -103,5 +111,5 @@ export interface PlayerLeft {
 
 export interface GameSync {
     event: "gameSync";
-    game: BingoGame
+    game: Partial<BingoGame> & Pick<BingoGame, "id">
 }

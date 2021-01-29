@@ -1,4 +1,4 @@
-import { NewBoard, Cell } from "../../../common/src/types/board";
+import { NewBoard, Cell } from "../../../common/src/types/types";
 import styles from "./BingoBoard.module.css";
 import c from "classnames";
 import { noop, transposeCells } from "../../../common/src/utils/utils";

@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda/trigger/api-gateway-proxy";
-import { BingoGame, NewBingoGame } from "../../common/src/types/board";
+import { BingoGame, NewBingoGame } from "../../common/src/types/types";
 import { useClient } from "./dynamoClient";
 import { alertAllListeners } from "./game-events";
 import { GameService } from "./game-service";
@@ -11,7 +11,7 @@ const gameService = new GameService(client);
 export const createGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardParams: NewBingoGame = JSON.parse(e.body!);
 
-    const newGame = await gameService.saveGame(boardParams);
+    const newGame = await gameService.createGame(boardParams);
     return {
         statusCode: 200,
         body: JSON.stringify(newGame),
@@ -31,7 +31,7 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
 
 export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
     const boardUpdate: Pick<BingoGame, "calledNumbers" | "id"> = JSON.parse(e.body!)
-    const update = await gameService.updateGame(boardUpdate);
+    const update = await gameService.updateCalledNumbers(boardUpdate);
     
     const websocketBackend = process.env.WEBSOCKET_BACKEND_ID;
     await alertAllListeners(boardUpdate.id, websocketBackend ?? "<unknown>", {

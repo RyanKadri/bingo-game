@@ -1,7 +1,7 @@
 import ky from "ky";
 import { useEffect, useState } from "react"
 import { useHistory } from "react-router-dom";
-import { BingoGame, NewBoard } from "../../../common/src/types/board";
+import { BingoGame, NewBoard } from "../../../common/src/types/types";
 import { createBoard } from "../../../common/src/utils/utils";
 import { BingoBoard } from "../components/BingoBoard";
 import { config } from "../utils/config";

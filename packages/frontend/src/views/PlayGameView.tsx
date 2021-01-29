@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button, Header, Icon, Label, Message } from "semantic-ui-react";
 import useSWR from "swr";
-import { BingoGame, CreatedBoard, Player } from "../../../common/src/types/board";
+import { BingoGame, CreatedBoard, Player } from "../../../common/src/types/types";
 import { BingoBoard } from "../components/BingoBoard";
 import { LastNumberDisplay } from "../components/LastNumberDisplay";
 import { BingoEventService } from "../services/websocket-events";
@@ -44,10 +44,16 @@ export function PlayGameView({ eventService, player }: Props) {
                 eventService.subscribeToGame(gameId, player.id, player.name);
             })
             eventService.onGameSync(e => {
-                mutateGameData(old => ({ 
-                    ...old,
-                    ...e.game
-                }))
+                if(e.game.id === gameId) {
+                    mutateGameData(old => { 
+                        if(old) {
+                            return {
+                                ...old,
+                                ...e.game
+                            }
+                        }
+                    })
+                } 
             })
             return () => { 
                 eventService.unsubscribe(gameId, player.id, player.name);
@@ -79,7 +85,7 @@ export function PlayGameView({ eventService, player }: Props) {
 
     const onCallBingo = () => {
         if(player) {
-            eventService.callBingo(gameId, player.id, player.name);
+            eventService.callBingo(gameId, boardId, player.id, player.name);
             setBingoDisabled(true);
             setTimeout(() => {
                 setBingoDisabled(false);
@@ -93,7 +99,7 @@ export function PlayGameView({ eventService, player }: Props) {
                 ? <h1>Loading</h1>
                 : (
                     <>
-                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.playerNames?.length ?? 0 } playing</Label></Header>
+                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.players?.length ?? 0 } playing</Label></Header>
                         <Message info>
                             <Message.List>
                                 <Message.Item>As your caller picks numbers, click on board squares to mark them</Message.Item>

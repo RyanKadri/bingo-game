@@ -1,4 +1,4 @@
-import { NewBoard, BoardParams, Cell } from "../types/board";
+import { NewBoard, BoardParams, Cell } from "../types/types";
 
 export function randBetween(min: number, max: number) {
     const range = max - min + 1;

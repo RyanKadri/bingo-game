@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandlerV2 } from "aws-lambda";
-import { NewPlayer, RegisterPlayerConnection } from "../../common/src/types/board";
+import { NewPlayer, RegisterPlayerConnection } from "../../common/src/types/types";
 import { useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { PlayerService } from "./player-service";

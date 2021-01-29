@@ -1,20 +1,22 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { BingoGame, NewBingoGame } from "../../common/src/types/board";
+import { BingoCall, BingoGame, NewBingoGame } from "../../common/src/types/types";
 import { gameTable } from "./utils/config";
-import { shortUID } from "./utils/utils";
+import { bundlePlayerInfo, shortUID, unbundlePlayerInfo } from "./utils/utils";
 
 export class GameService {
     constructor(
         private client: DocumentClient
     ){}
 
-    async saveGame(newGame: NewBingoGame) {
-        const game: BingoGame = {
+    async createGame(newGame: NewBingoGame) {
+        const game: Partial<BingoGame> = {
             id: shortUID(),
             name: newGame.name,
             gameParams: newGame.gameParams,
             calledNumbers: [],
-            boards: []
+            boards: [],
+            bingoCalls: [],
+            createdDate: Date.now()
         }
         
         await this.client.put({ 
@@ -25,66 +27,88 @@ export class GameService {
         return game;
     }
 
-    async updateGame(updatedBoard: Pick<BingoGame, "id" | "calledNumbers">) {
+    async updateCalledNumbers(updatedBoard: Pick<BingoGame, "id" | "calledNumbers">) {
+        const addedNumber = updatedBoard.calledNumbers[updatedBoard.calledNumbers.length - 1];
         const updated = await this.client.update({
             TableName: gameTable,
             Key: { id: updatedBoard.id },
-            UpdateExpression: "set #calledNumbers = :numbers",
-            ExpressionAttributeNames: {
-              "#calledNumbers": "calledNumbers"
-            },
+            UpdateExpression: "set calledNumbers = list_append(calledNumbers, :number)",
             ExpressionAttributeValues: {
-              ":numbers": updatedBoard.calledNumbers
+              ":number": [addedNumber]
             },
             ReturnValues: "ALL_NEW"
         }).promise();
 
-        return this.normalizeGame(updated.Attributes as BingoGame);
+        const game = this.normalizeGame(updated.Attributes as BingoGame);
+        return {
+            id: game.id,
+            calledNumbers: game.calledNumbers
+        }
     }
 
-    async registerSubscription(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
+    async registerBingo(gameId: string, call: BingoCall) {
+        const updated = await this.client.update({
+            TableName: gameTable,
+            Key: { id: gameId },
+            UpdateExpression: "set bingoCalls = list_append(bingoCalls, :call)",
+            ExpressionAttributeValues: {
+              ":call": [call]
+            },
+            ReturnValues: "ALL_NEW"
+        }).promise();
+
+        const game = this.normalizeGame(updated.Attributes as BingoGame);
+        return {
+            id: game.id,
+            bingoCalls: game.bingoCalls
+        }
+    }
+
+    async registerSubscription(gameId: string, connectionId: string, playerId: string, playerName: string) {
         const toAdd = ["listeners :connectionId"];
-        if(playerId) {
-            toAdd.push("playerIds :playerId");
-        }
-        if(playerName) {
-            toAdd.push("playerNames :playerName");
-        }
+        const playerInfo = bundlePlayerInfo(playerName, playerId)
+        toAdd.push("playerInfo :playerInfo");
+
         const updateRes = await this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
             UpdateExpression: `ADD ${ toAdd.join(", ") }`,
             ExpressionAttributeValues: {
                 ":connectionId": this.client.createSet([connectionId]),
-                ":playerId": playerId ? this.client.createSet([playerId]) : undefined,
-                ":playerName": playerName ? this.client.createSet([playerName]) : undefined
+                ":playerInfo": this.client.createSet([playerInfo]),
             },
             ReturnValues: "ALL_NEW"
         }).promise();
 
-        return this.normalizeGame(updateRes.Attributes as BingoGame);
+        const game = this.normalizeGame(updateRes.Attributes as BingoGame);
+        return {
+            id: game.id,
+            listeners: game.listeners,
+            players: game.players
+        }
     }
 
-    async unsubscribe(gameId: string, connectionId: string, playerId?: string, playerName?: string) {
+    async unsubscribe(gameId: string, connectionId: string, playerId: string, playerName: string) {
         const toDelete = ["listeners :connectionId"];
-        if(playerId) {
-            toDelete.push("playerIds :playerId");
-        }
-        if(playerName) {
-            toDelete.push("playerNames :playerName");
-        }
+        const playerInfo = bundlePlayerInfo(playerName, playerId);
+        toDelete.push("playerInfo :playerInfo");
+
         const updateRes = await this.client.update({
             TableName: gameTable,
             Key: { id: gameId },
             UpdateExpression: `DELETE ${ toDelete.join(", ") }`,
             ExpressionAttributeValues: {
               ":connectionId": this.client.createSet([connectionId]),
-              ":playerId": playerId ? this.client.createSet([playerId]) : undefined,
-              ":playerName": playerName ? this.client.createSet([playerName]) : undefined
+              ":playerInfo": this.client.createSet([playerInfo]),
             }
         }).promise();
 
-        return this.normalizeGame(updateRes.Attributes as BingoGame);
+        const game = this.normalizeGame(updateRes.Attributes as BingoGame);
+        return {
+            id: game.id,
+            listeners: game.listeners,
+            players: game.players
+        }
     }
 
     async fetchGame(boardId: string): Promise<BingoGame> {
@@ -111,16 +135,15 @@ export class GameService {
         }).promise()
     }
 
-    private normalizeGame(game: BingoGame) {
+    private normalizeGame(game: BingoGame): BingoGame {
         const listeners: string[] = ((game.listeners as any)?.values ?? []).slice();
-        const playerIds: string[] = ((game.playerIds as any)?.values ?? []).slice();
-        const playerNames: string[] = ((game.playerNames as any)?.values ?? []).slice();
+        const encodedPlayerInfo: string[] = ((game as any)?.playerInfo?.values ?? []).slice();
+        const players = encodedPlayerInfo.map(info => unbundlePlayerInfo(info));
 
         return {
             ...game,
             listeners,
-            playerIds,
-            playerNames
+            players: players
         };
     }
 }
