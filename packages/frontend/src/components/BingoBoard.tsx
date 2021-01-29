@@ -9,11 +9,15 @@ interface Props {
     rowWise?: boolean;
     onCellSelect?: (col: number, row: number, cell: Cell) => void;
     className?: string;
+    showExpected?: boolean;
+    showErrors?: boolean;
 }
 
 interface DefaultedProps {
     board: NewBoard;
     canSelect: boolean;
+    showExpected: boolean;
+    showErrors: boolean;
     onCellSelect: (col: number, row: number, cell: Cell) => void;
 }
 
@@ -23,24 +27,35 @@ export function BingoBoard({
     onCellSelect = noop, 
     rowWise = false,
     className = "",
+    showExpected = false,
+    showErrors = false
 }: Props) {
 
     const selectHandler = canSelect ? onCellSelect : noop;
+    
     return (
-        <section className={ className }>
+        <section className={ c(styles.boardContainer, className) }>
             <table className={ c(styles.boardTable, { [styles.selectable]: canSelect, [styles.rowWise]: rowWise }) }>
                 { rowWise
-                    ? <HorizontalBoard board={ board } canSelect={ canSelect } onCellSelect={ selectHandler } />
-                    : <VerticalBoard board={ board } canSelect={ canSelect } onCellSelect={ selectHandler } />
+                    ? <HorizontalBoard board={ board } 
+                                       canSelect={ canSelect } 
+                                       onCellSelect={ selectHandler } 
+                                       showExpected={ showExpected }
+                                       showErrors={ showErrors } />
+                    : <VerticalBoard board={ board } 
+                                     canSelect={ canSelect } 
+                                     onCellSelect={ selectHandler } 
+                                     showExpected={ showExpected }
+                                     showErrors={ showErrors }/>
                 }
             </table>
         </section>
     )
 }
 
-function VerticalBoard({ board, onCellSelect}: DefaultedProps) {
+function VerticalBoard({ board, onCellSelect, showExpected, showErrors }: DefaultedProps) {
     const rows = transposeCells(board);
-
+    const cellWidth = `${ 100 / Math.max(board.letters.length, 1) }`;
     return (
         <>
         <thead>
@@ -55,8 +70,13 @@ function VerticalBoard({ board, onCellSelect}: DefaultedProps) {
                 <tr key={ rowInd }>
                     {
                         row.map((cell, cellInd) => (
-                            <td key={ cellInd } className={ c({ [styles.selected]: cell.selected }) }
-                                onClick={ () => onCellSelect(cellInd, rowInd, cell) }>
+                            <td key={ cellInd } 
+                                className={ c({ 
+                                    [styles.selected]: showExpected ? cell.shouldBeSelected : cell.selected,
+                                    [styles.incorrect]: !showErrors ? false : cell.selected && !cell.shouldBeSelected 
+                                }) }
+                                onClick={ () => onCellSelect(cellInd, rowInd, cell) }
+                                style={ { width: cellWidth } }>
                                 { cell.type === "free"
                                     ? "Free"
                                     : cell.number }
@@ -71,14 +91,19 @@ function VerticalBoard({ board, onCellSelect}: DefaultedProps) {
 }
 
 function HorizontalBoard({ board, onCellSelect}: DefaultedProps) {
+    const numCols = board.categories?.[0]?.length ?? 0;
+    const cellWidth = `${ 100 / (numCols + 1) }%`;
     return (
         <tbody>
             { board.categories.map((category, categoryInd) => (
                 <tr key={ categoryInd }>
-                    <th>{board.letters[categoryInd]}</th>
+                    <th style={{ width: cellWidth }}>
+                        {board.letters[categoryInd]}
+                    </th>
                     { category.map((cell, cellInd) => (
                         <td key={ cellInd } className={ c({ [styles.selected]: cell.selected }) }
-                            onClick={ () => onCellSelect(categoryInd, cellInd, cell) }>
+                            onClick={ () => onCellSelect(categoryInd, cellInd, cell) }
+                            style={{ width: cellWidth }}>
                             { cell.type === "free"
                                 ? "Free"
                                 : cell.number }

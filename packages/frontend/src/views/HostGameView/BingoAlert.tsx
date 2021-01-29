@@ -1,12 +1,14 @@
 import React from "react";
-import { Message } from "semantic-ui-react";
-import { BingoCall } from "../../../../common/src/types/types";
+import { Message, Modal } from "semantic-ui-react";
+import { BingoCall, BingoGame } from "../../../../common/src/types/types";
 import styles from "./BingoAlert.module.css";
+import { BingoChecker } from "./BingoChecker";
 
 interface Props {
     bingoCalls: BingoCall[];
+    game: BingoGame;
 }
-export function BingoAlert({ bingoCalls }: Props) {
+export function BingoAlert({ bingoCalls, game }: Props) {
     return (
         <Message>
             <Message.Header>
@@ -17,13 +19,22 @@ export function BingoAlert({ bingoCalls }: Props) {
                 }
                 &nbsp;called Bingo
             </Message.Header>
-            <Message.List className={ styles.bingoCallerList }>
-                { bingoCalls.map((call, i) => (
-                    <Message.Item key={ call.playerId + call.callTime }>
+            <ul className={ styles.bingoCallerList }>
+                { bingoCalls.map((call) => (
+                    <li key={ call.playerId + call.callTime }>
                         { call.playerName }
-                    </Message.Item>
+                        { game.gameParams.showBoards && (
+                            <Modal className={ styles.checkModal }
+                                trigger={ 
+                                    <button className={ styles.checkButton }>Check</button>
+                                }
+                            >
+                                <BingoChecker call={ call } game={ game } />
+                            </Modal>
+                        )}
+                    </li>
                 )) }
-            </Message.List>
+            </ul>
         </Message>
     )
 }

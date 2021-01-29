@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import ky from "ky";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -8,7 +9,8 @@ import { BingoBoard } from "../components/BingoBoard";
 import { LastNumberDisplay } from "../components/LastNumberDisplay";
 import { BingoEventService } from "../services/websocket-events";
 import { config } from "../utils/config";
-import styles from "./game-view.module.css";
+import sharedStyles from "./game-view.module.css";
+import styles from "./PlayGameView.module.css"
 
 const bingoTimeout = 2000; 
 interface Props {
@@ -94,7 +96,7 @@ export function PlayGameView({ eventService, player }: Props) {
     }
 
     return (
-        <main className={ styles.container }>
+        <main className={ sharedStyles.container }>
             { (!gameData || !boardData)
                 ? <h1>Loading</h1>
                 : (
@@ -116,8 +118,8 @@ export function PlayGameView({ eventService, player }: Props) {
                             </Button>
                         </header>
                         { !!board && (
-                            <section className={ styles.boardContainer }>
-                                <BingoBoard board={ board } canSelect={true} className={ styles.bingoBoard }
+                            <section className={ classNames(sharedStyles.boardContainer, styles.playerBoard) }>
+                                <BingoBoard board={ board } canSelect={true} className={ sharedStyles.bingoBoard }
                                             onCellSelect={ onCellSelect } /> 
                             </section>
                         )}

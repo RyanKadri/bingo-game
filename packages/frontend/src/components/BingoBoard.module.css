@@ -1,4 +1,5 @@
 .boardTable {
+    width: 100%;
     border: 3px solid #444;
     border-spacing: 0;
     border-collapse: collapse;
@@ -33,4 +34,12 @@
 
 .selected {
     background-color: hsl(206 73% 47% / 0.5);
+}
+
+.boardContainer {
+    width: 100%;
+}
+
+.incorrect {
+    background-color: hsl(0 73% 47% / 0.5);
 }

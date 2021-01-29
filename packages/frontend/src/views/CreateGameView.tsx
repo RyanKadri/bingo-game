@@ -20,6 +20,7 @@ export function CreateGameView() {
     const [ safeMax, setSafeMax ] = useState(maxNumber);
     const [ freeCenter, setFreeCenter ] = useState(true);
     const [ gameName, setGameName ] = useState("");
+    const [ showBoards, setShowBoards ] = useState(true);
 
     const [ exampleBoard, setExampleBoard ] = useState<NewBoard | null>(null);
     const history = useHistory();
@@ -31,10 +32,11 @@ export function CreateGameView() {
                 letters: gameLetters, 
                 rows: gameLetters.length,
                 maxNumber: safeMax, 
-                freeCenter: evenRows ? false : freeCenter
+                freeCenter: evenRows ? false : freeCenter,
+                showBoards
             })
         );
-    }, [gameLetters, safeMax, freeCenter, evenRows])
+    }, [gameLetters, safeMax, freeCenter, evenRows, showBoards])
 
     const onUpdateLetters = (e: React.ChangeEvent<HTMLInputElement>) => {
         const nextVal = e.target.value;
@@ -67,7 +69,8 @@ export function CreateGameView() {
                     letters: gameLetters, 
                     rows: gameLetters.length,
                     maxNumber, 
-                    freeCenter: evenRows ? false : freeCenter
+                    freeCenter: evenRows ? false : freeCenter,
+                    showBoards: showBoards
                 }
             }
         }).json();
@@ -93,6 +96,8 @@ export function CreateGameView() {
                     <Form.Checkbox label="Free Center" checked={ evenRows ? false : freeCenter }
                             disabled={ evenRows }
                             onChange={ (_, val) => onUpdateFreeCenter(val.checked ?? false) } />
+                    <Form.Checkbox label="Check Boards on Bingo" checked={ showBoards }
+                            onChange={ (_, val) => setShowBoards(val.checked ?? false) } />
                     <Form.Button onClick={ onCreateGame } type="button" primary>
                         Create Game
                     </Form.Button>
@@ -104,7 +109,7 @@ export function CreateGameView() {
                     <Header as="h2">Sample Board</Header>
                     <div className={ styles.boardBox }>
                         <BingoBoard board={ exampleBoard } />
-                    </ div>
+                    </div>
                 </section>
             )}
         </main>

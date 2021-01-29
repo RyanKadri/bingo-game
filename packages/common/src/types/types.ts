@@ -15,6 +15,7 @@ export interface BingoCall {
     playerId: string;
     boardId: string;
     callTime: number;
+    status?: "accepted" | "rejected"
 }
 
 export type NewBingoGame = Pick<BingoGame, "name" | "gameParams">;
@@ -24,6 +25,7 @@ export interface BoardParams {
     maxNumber: number;
     rows: number;
     freeCenter: boolean;
+    showBoards: boolean;
 }
 
 export interface NewBoard {
@@ -40,12 +42,14 @@ export type Cell = NumberCell | FreeCell;
 interface FreeCell {
     type: "free";
     selected: boolean;
+    shouldBeSelected?: boolean;
 }
 
 interface NumberCell {
     type: "number";
     number: number;
     selected: boolean;
+    shouldBeSelected?: boolean;
 }
 
 export interface NewPlayer {

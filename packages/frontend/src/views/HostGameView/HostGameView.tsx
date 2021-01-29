@@ -10,7 +10,8 @@ import { GamePlayersLabel } from "../../components/GamePlayersLabel";
 import { LastNumberDisplay } from "../../components/LastNumberDisplay";
 import { BingoEventService } from "../../services/websocket-events";
 import { config } from "../../utils/config";
-import styles from "../game-view.module.css";
+import sharedStyles from "../game-view.module.css";
+import styles from "./HostGameView.module.css";
 import { BingoAlert } from "./BingoAlert";
 import { CallHistory } from "./CallHistory";
 import { JoinGameLink } from "./JoinGameLink";
@@ -129,24 +130,24 @@ export function HostGameView({ eventService, player }: Props) {
     }, [ eventService, gameId, mutate, player ])
 
     return (
-        <main className={ styles.container }>
+        <main className={ sharedStyles.container }>
             { (!gameData && !error)
                 ? <Header>Loading</Header>
                 : (!gameData && error)
                     ? <h1>Error</h1>
                     : (
                         <>
-                            <Header as="h1">
-                                Hosting "{ gameData!.name }"
+                            <header className={ styles.hostHeader }>
+                                <h1 className={ styles.title }>Hosting "{ gameData!.name }"</h1>
                                 <GamePlayersLabel players={ gameData?.players ?? [] } />
-                            </Header>
-                            <JoinGameLink gameId={ gameId }></JoinGameLink>
+                                <JoinGameLink gameId={ gameId } className={ styles.joinLink } />
+                            </header>
                             { gameData && gameData.bingoCalls.length > 0 && (
-                                <BingoAlert bingoCalls={ gameData.bingoCalls } />
+                                <BingoAlert bingoCalls={ gameData.bingoCalls } game={ gameData } />
                             )}
                             { !!trackingBoard && (
-                                <section className={ styles.boardContainer }>
-                                    <Form.Group widths="equal" className={ styles.controls }>
+                                <section className={ sharedStyles.boardContainer }>
+                                    <Form.Group widths="equal" className={ sharedStyles.controls }>
                                         <Button onClick={ onPickRandomCell }>Next Number</Button>
                                         { gameData && (
                                             <LastNumberDisplay gameData={ gameData } />

@@ -1,4 +1,29 @@
 .bingoCallerList {
     max-height: 200px;
     overflow: auto;
+    margin-top: 8px;
+    padding: 0 20px;
+}
+
+.bingoCallerList li {
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.bingoCallerList li:last-of-type {
+    margin-bottom: 0px;
+}
+
+.checkModal {
+    max-width: 450px;
+}
+
+.checkButton {
+    border: none;
+    margin-left: 8px;
+    background-color: #188632;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
 }

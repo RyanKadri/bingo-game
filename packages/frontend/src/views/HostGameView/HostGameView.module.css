@@ -1,0 +1,24 @@
+.hostHeader {
+    display: flex;
+    margin-bottom: 2em;
+    align-items: center;
+}
+
+.title {
+    margin: 0;
+    margin-right: 16px;
+}
+
+.joinLink {
+    margin-left: auto;
+}
+
+@media (max-width: 800px) {
+    .joinLink {
+        margin-left: 0;
+    }
+
+    .hostHeader {
+        flex-direction: column;
+    }
+}
