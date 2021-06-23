@@ -13,7 +13,7 @@ export function CallHistory({ calledNumbers, gameParams }: Props) {
             <Header>Called Numbers</Header>
             <List>
                 { calledNumbers.slice().reverse().map(num => (
-                    <List.Item key={ num }>
+                    <List.Item key={ num } data-cy="call-history">
                         <CalledNumber num={ num } gameParams={ gameParams } />
                     </List.Item>
                 ))}

@@ -10,9 +10,9 @@ export function LastNumberDisplay({ gameData }: Props) {
     const lastNumber = gameData.calledNumbers[gameData.calledNumbers.length -1]
 
     return (
-        <div className={ styles.lastNumber }>
+        <div className={ styles.lastNumber } data-cy="last-number-display">
             Last Picked:&nbsp;
-            <CalledNumber num={ lastNumber } gameParams={ gameData.gameParams }/>
+            <CalledNumber num={ lastNumber } gameParams={ gameData.gameParams } />
         </div>
     )
 }
