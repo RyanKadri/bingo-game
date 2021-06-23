@@ -101,7 +101,7 @@ export function PlayGameView({ eventService, player }: Props) {
                 ? <h1>Loading</h1>
                 : (
                     <>
-                        <Header as="h1">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.players?.length ?? 0 } playing</Label></Header>
+                        <Header as="h1" data-cy="game-title">{ gameData.name } <Label color="black"><Icon name="users" />{ gameData.players?.length ?? 0 } playing</Label></Header>
                         <Message info>
                             <Message.List>
                                 <Message.Item>As your caller picks numbers, click on board squares to mark them</Message.Item>

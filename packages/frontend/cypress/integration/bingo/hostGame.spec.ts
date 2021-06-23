@@ -4,13 +4,13 @@ import { mockPlayer } from "../../utils/mock/player";
 const examplePlayer = mockPlayer({ id: "player-123", name: "Bob Jones", connectionId: "conn-123", games: [] });
 const gameId = "g1234";
 
-context('Create User', () => {
+context('Host a game', () => {
     beforeEach(() => {
         localStorage.setItem("bingo.playerInfo", JSON.stringify(examplePlayer))
         cy.visit(`/game/${gameId}/host`)
     });
   
-    it("Displays a game properly", () => {
+    it("Displays the hosting view properly", () => {
         const gameName = "My Game";
         const gameLetters = "WALDO";
         const maxNumber = 75;
