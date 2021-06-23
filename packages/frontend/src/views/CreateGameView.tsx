@@ -82,18 +82,19 @@ export function CreateGameView() {
             <section>
                 <Header as="h1">Create a Bingo Game</Header>
                 <Form>
-                    <Form.Input label="Game Name" type="text" 
+                    <Form.Input label="Game Name" type="text" id="game-name"
                                 value={ gameName } onChange={ e => setGameName(e.target.value) }>
                     </Form.Input>
-                    <Form.Input label="Board Letters" type="text"
+                    <Form.Input label="Board Letters" type="text" id="letters"
                                 value={ gameLetters } onChange={ onUpdateLetters }/>
-                    <Form.Input label="Maximum Number" type="number"
+                    <Form.Input label="Maximum Number" type="number" id="max-number"
                                 value={ maxNumber }
                                 min={ gameLetters.length ** 2 * 2 }
                                 step={ Math.max(gameLetters.length, 1 )}
                                 onBlur={ roundMax }
                                 onChange={ onUpdateMax } />
-                    <Form.Checkbox label="Free Center" checked={ evenRows ? false : freeCenter }
+                    <Form.Checkbox label="Free Center" 
+                            checked={ evenRows ? false : freeCenter } id="free-center"
                             disabled={ evenRows }
                             onChange={ (_, val) => onUpdateFreeCenter(val.checked ?? false) } />
                     <Form.Checkbox label="Check Boards on Bingo" checked={ showBoards }

@@ -39,7 +39,7 @@ export function TopNav({ player, onUpdatePlayer }: Props) {
             </ul>
             <form className={ styles.nameForm } 
                   onSubmit={ onUpdateName }>
-                <Input label="Your Name" value={ playerName } 
+                <Input label="Your Name" value={ playerName } id="player-name"
                        icon={ ackNameUpdate ? <Icon color="green" name="check"></Icon> : "" }
                        onChange={ (_, data) => setPlayerName(data.value) } />
             </form>

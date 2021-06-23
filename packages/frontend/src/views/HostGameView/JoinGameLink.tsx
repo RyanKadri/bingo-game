@@ -23,7 +23,7 @@ export function JoinGameLink({ gameId, className }: Props) {
     return (
         <Popup
             trigger={
-                <Input 
+                <Input id="game-link"
                     type="text" size="small"
                     className={ classNames(styles.linkInput, className) }
                     value={ joinableLink }

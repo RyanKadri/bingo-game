@@ -1,16 +1,16 @@
 {
-    "eslintConfig": {
-      "extends": ["react-app"],
+  "extends": ["react-app"],
+  "rules": {
+    "no-restricted-globals": "false",
+    "jest/valid-expect-in-promise": "off"
+  }, 
+  "overrides": [
+    {
+      "files": ["**/*.ts?(x)"],
       "rules": {
-        "no-restricted-globals": "false"
-      },
-      "overrides": [
-        {
-          "files": ["**/*.ts?(x)"],
-          "rules": {
-            "additional-typescript-only-rule": "warn"
-          }
-        }
-      ]
+        "additional-typescript-only-rule": "warn",
+        "jest/valid-expect-in-promise": "off"
+      }
     }
-  }
+  ]
+}

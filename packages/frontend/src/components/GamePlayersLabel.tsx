@@ -10,13 +10,13 @@ export function GamePlayersLabel({ players }: Props) {
         <Popup
             on="click"
             trigger={
-                <Label color="black">
+                <Label color="black" data-cy="players-list-trigger">
                     <Icon name="users" />
                     { players.length } playing
                 </Label>
             }
             content={
-                <List>
+                <List data-cy="players-list">
                     { players.map(player => (
                         <List.Item key={ player.id }>
                             { player.name }
