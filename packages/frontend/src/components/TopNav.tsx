@@ -28,7 +28,7 @@ export function TopNav({ player, onUpdatePlayer }: Props) {
 
     return (
         <nav className={ styles.topNav }>
-            <header>Bing.0</header>
+            <header>Bingoooo</header>
             <ul>
                 <li>
                     <Link to="/">Instructions</Link>
