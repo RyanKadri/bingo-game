@@ -63,8 +63,8 @@ export function transposeCells(board: NewBoard): Cell[][] {
 export function noop() {}
 
 export function pickRandomFrom<T>(things: T[]) {
-    const ind = process.env.ENVIRONMENT === "cypress"
-        ? randBetween(0, things.length - 1)
-        : (window as any).nextRandom;
+    const ind = process.env.REACT_APP_ENVIRONMENT === "cypress"
+        ? (window as any).nextRandom ?? randBetween(0, things.length - 1)
+        : randBetween(0, things.length - 1);
     return things[ind];
 }

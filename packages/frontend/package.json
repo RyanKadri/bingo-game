@@ -23,7 +23,7 @@
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
-    "start:cypress": "ENVIRONMENT=CYPRESS npm start"
+    "start:cypress": "REACT_APP_ENVIRONMENT=cypress npm start"
   },
   "eslintConfig": {
     "extends": [
