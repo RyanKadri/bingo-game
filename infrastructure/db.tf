@@ -1,7 +1,7 @@
 resource "aws_dynamodb_table" "game-table" {
   hash_key = "id"
   name = "bingo-games${var.environment-suffix}"
-  billing_mode = "PROVISIONED"
+  billing_mode = var.dynamo-billing-mode
   write_capacity = var.starting-write-capacity
   read_capacity = var.starting-read-capacity
   attribute {
@@ -20,7 +20,7 @@ resource "aws_dynamodb_table" "game-table" {
 resource "aws_dynamodb_table" "board-table" {
   hash_key = "id"
   name = "bingo-boards${var.environment-suffix}"
-  billing_mode = "PROVISIONED"
+  billing_mode = var.dynamo-billing-mode
   write_capacity = var.starting-write-capacity
   read_capacity = var.starting-read-capacity
   attribute {
@@ -39,7 +39,7 @@ resource "aws_dynamodb_table" "board-table" {
 resource "aws_dynamodb_table" "player-table" {
   hash_key = "id"
   name = "bingo-players${var.environment-suffix}"
-  billing_mode = "PROVISIONED"
+  billing_mode = var.dynamo-billing-mode
   write_capacity = var.starting-write-capacity
   read_capacity = var.starting-read-capacity
   attribute {

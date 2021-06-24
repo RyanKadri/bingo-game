@@ -13,3 +13,8 @@ variable "starting-write-capacity" {
   type = number
   default = 5
 }
+
+variable "dynamo-billing-mode" {
+  type = string
+  default = "PROVISIONED"
+}

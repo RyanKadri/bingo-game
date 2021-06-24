@@ -18,7 +18,7 @@ resource "aws_appautoscaling_target" "read-targets" {
     }
   })
   max_capacity = 100
-  min_capacity = 5
+  min_capacity = 1
   resource_id = each.value.name
   scalable_dimension = each.value.scalable
   service_namespace = "dynamodb"
@@ -44,7 +44,7 @@ resource "aws_appautoscaling_target" "write-targets" {
     }
   })
   max_capacity = 100
-  min_capacity = 5
+  min_capacity = 1
   resource_id = each.value.name
   scalable_dimension = each.value.scalable
   service_namespace = "dynamodb"
@@ -52,7 +52,7 @@ resource "aws_appautoscaling_target" "write-targets" {
 
 resource "aws_appautoscaling_policy" "table-read-policies" {
   for_each = aws_appautoscaling_target.read-targets
-  name               = "bingo-read-capacity-utilization-${each.value.resource_id}"
+  name               = "bingo${var.environment-suffix}-read-capacity-utilization-${each.value.resource_id}"
   policy_type        = "TargetTrackingScaling"
   resource_id        = each.value.resource_id
   scalable_dimension = each.value.scalable_dimension
@@ -68,7 +68,7 @@ resource "aws_appautoscaling_policy" "table-read-policies" {
 
 resource "aws_appautoscaling_policy" "table-write-policies" {
   for_each = aws_appautoscaling_target.write-targets
-  name               = "bingo-write-capacity-utilization-${each.value.resource_id}"
+  name               = "bingo${var.environment-suffix}-write-capacity-utilization-${each.value.resource_id}"
   policy_type        = "TargetTrackingScaling"
   resource_id        = each.value.resource_id
   scalable_dimension = each.value.scalable_dimension
