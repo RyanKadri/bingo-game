@@ -8,6 +8,9 @@
 [context.deploy-preview.environment]
   REACT_APP_BINGO_API = "https://xfto3unddk.execute-api.us-east-1.amazonaws.com"
   REACT_APP_BINGO_WEBSOCKET = "wss://btbl61pij6.execute-api.us-east-1.amazonaws.com/dev"
+[context.qa.environment]
+  REACT_APP_BINGO_API = "https://xfto3unddk.execute-api.us-east-1.amazonaws.com"
+  REACT_APP_BINGO_WEBSOCKET = "wss://btbl61pij6.execute-api.us-east-1.amazonaws.com/dev"
 [[redirects]]
   from = "/*"
   to = "/index.html"
