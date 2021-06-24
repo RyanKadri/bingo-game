@@ -1,6 +1,6 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { CreatedBoard, NewBoard } from "../../common/src/types/types";
-import { boardTable } from "./utils/config";
+import { boardTable, gameTTL } from "./utils/config";
 
 export class BoardService {
     constructor(
@@ -26,7 +26,10 @@ export class BoardService {
     saveBoard(newBoard: NewBoard) {
         return this.client.put({ 
             TableName: boardTable,
-            Item: newBoard
+            Item: {
+                ...newBoard,
+                expirationDate: (Date.now() / 1000) + gameTTL * 24 * 60 * 60
+            }
         }).promise();
     }
 }

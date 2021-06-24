@@ -14,3 +14,5 @@ export const boardTable = assertExists(
     process.env.BINGO_BOARD_DYNAMO_TABLE,
     "Expected board table to be set"
 );
+
+export const gameTTL = parseInt(process.env.BINGO_GAME_TTL_DAYS ?? "1")

@@ -1,6 +1,6 @@
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { BingoCall, BingoGame, NewBingoGame } from "../../common/src/types/types";
-import { gameTable } from "./utils/config";
+import { gameTable, gameTTL } from "./utils/config";
 import { bundlePlayerInfo, shortUID, unbundlePlayerInfo } from "./utils/utils";
 
 export class GameService {
@@ -16,7 +16,8 @@ export class GameService {
             calledNumbers: [],
             boards: [],
             bingoCalls: [],
-            createdDate: Date.now()
+            createdDate: Date.now(),
+            expirationDate: (Date.now() / 1000) + gameTTL * 24 * 60 * 60
         }
         
         await this.client.put({ 

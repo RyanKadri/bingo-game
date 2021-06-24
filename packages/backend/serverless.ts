@@ -4,6 +4,7 @@ const dynamoEnvironment = {
   BINGO_GAME_DYNAMO_TABLE: "${ssm:bingo-game-table}",
   BINGO_BOARD_DYNAMO_TABLE: "${ssm:bingo-board-table}",
   BINGO_PLAYER_DYNAMO_TABLE: "${ssm:bingo-player-table}",
+  BINGO_GAME_TTL_DAYS: "30",
   WEBSOCKET_BACKEND_ID: { "Ref": "WebsocketsApi" }
 };
 
@@ -170,16 +171,7 @@ const config: Serverless = {
       webpackConfig: "webpack.config.ts",
       includeModules: true,
       forceExclude: ["aws-sdk"]
-    },
-    // customDomain: {
-    //   domainName: "bingo-api.rk0.xyz",
-    //   stage: "$default",
-    //   certificateName: "*.rk0.xyz",
-    //   createRoute53Record: false,
-    //   autoDomain: true,
-    //   apiType: "http",
-    //   endpointType: "regional"
-    // }
+    }
   }
 }
 

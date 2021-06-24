@@ -1,6 +1,7 @@
 export interface BingoGame {
     id: string;
     createdDate: number;
+    expirationDate: number;
     name: string;
     gameParams: BoardParams;
     calledNumbers: number[];
@@ -35,6 +36,7 @@ export interface NewBoard {
 
 export interface CreatedBoard extends NewBoard {
     id: string;
+    expirationDate: number;
 }
 
 export type Cell = NumberCell | FreeCell;
