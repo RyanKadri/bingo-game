@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "board-table-capacity" {
-  alarm_name = "bingo-table-capacity"
+  alarm_name = "bingo-table-capacity${var.environment-suffix}"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = 1
   threshold = 25

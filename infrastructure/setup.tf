@@ -1,5 +1,11 @@
 provider "aws" {
   region = "us-east-1"
+  default_tags {
+    tags = {
+      App = "Bingo"
+      Environment = var.environment-suffix == "" ? "prod" : substr(var.environment-suffix, 1, -1)
+    }
+  }
 }
 
 provider "archive" {

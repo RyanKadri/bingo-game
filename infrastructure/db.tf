@@ -1,24 +1,28 @@
 resource "aws_dynamodb_table" "game-table" {
   hash_key = "id"
-  name = "bingo-games"
+  name = "bingo-games${var.environment-suffix}"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = var.starting-write-capacity
+  read_capacity = var.starting-read-capacity
   attribute {
     name = "id"
     type = "S"
   }
   lifecycle {
     ignore_changes = [write_capacity, read_capacity]
+  }
+  ttl {
+    attribute_name = "expirationDate"
+    enabled = true
   }
 }
 
 resource "aws_dynamodb_table" "board-table" {
   hash_key = "id"
-  name = "bingo-boards"
+  name = "bingo-boards${var.environment-suffix}"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = var.starting-write-capacity
+  read_capacity = var.starting-read-capacity
   attribute {
     name = "id"
     type = "S"
@@ -26,14 +30,18 @@ resource "aws_dynamodb_table" "board-table" {
   lifecycle {
     ignore_changes = [write_capacity, read_capacity]
   }
+  ttl {
+    attribute_name = "expirationDate"
+    enabled = true
+  }
 }
 
 resource "aws_dynamodb_table" "player-table" {
   hash_key = "id"
-  name = "bingo-players"
+  name = "bingo-players${var.environment-suffix}"
   billing_mode = "PROVISIONED"
-  write_capacity = 5
-  read_capacity = 5
+  write_capacity = var.starting-write-capacity
+  read_capacity = var.starting-read-capacity
   attribute {
     name = "id"
     type = "S"
@@ -47,8 +55,8 @@ resource "aws_dynamodb_table" "player-table" {
     range_key = "id"
     name = "bingo-players-by-connection"
     projection_type = "ALL"
-    write_capacity = 5
-    read_capacity = 5
+    write_capacity = var.starting-write-capacity
+    read_capacity = var.starting-read-capacity
   }
   lifecycle {
     ignore_changes = [write_capacity, read_capacity]
@@ -56,19 +64,19 @@ resource "aws_dynamodb_table" "player-table" {
 }
 
 resource "aws_ssm_parameter" "game_table_name" {
-  name = "bingo-game-table"
+  name = "bingo-game-table${var.environment-suffix}"
   type = "String"
   value = aws_dynamodb_table.game-table.name
 }
 
 resource "aws_ssm_parameter" "board_table_name" {
-  name = "bingo-board-table"
+  name = "bingo-board-table${var.environment-suffix}"
   type = "String"
   value = aws_dynamodb_table.board-table.name
 }
 
 resource "aws_ssm_parameter" "player_table_name" {
-  name = "bingo-player-table"
+  name = "bingo-player-table${var.environment-suffix}"
   type = "String"
   value = aws_dynamodb_table.player-table.name
 }

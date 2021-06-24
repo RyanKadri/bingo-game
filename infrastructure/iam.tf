@@ -38,12 +38,12 @@ data "aws_iam_policy_document" "bingo-tables" {
 }
 
 resource "aws_iam_policy" "bingo-tables-policy" {
-  name = "bingo-tables"
+  name = "bingo-tables${var.environment-suffix}"
   policy = data.aws_iam_policy_document.bingo-tables.json
 }
 
 resource "aws_iam_role" "bingo-lambda-role" {
-  name = "bingo-lambda-role"
+  name = "bingo-lambda-role${var.environment-suffix}"
   assume_role_policy = data.aws_iam_policy_document.general-lambda-assume.json
 }
 
