@@ -2,10 +2,12 @@
   publish = "build"
   command = "npm run build"
   base = "packages/frontend"
-[build.environment]
+[context.production.environment]
   REACT_APP_BINGO_API = "https://bingo-api.rk0.xyz"
   REACT_APP_BINGO_WEBSOCKET = "wss://3tez7wj1ce.execute-api.us-east-1.amazonaws.com/prod"
-
+[context.deploy-preview.environment]
+  REACT_APP_BINGO_API = "https://xfto3unddk.execute-api.us-east-1.amazonaws.com"
+  REACT_APP_BINGO_WEBSOCKET = "wss://btbl61pij6.execute-api.us-east-1.amazonaws.com/dev"
 [[redirects]]
   from = "/*"
   to = "/index.html"
