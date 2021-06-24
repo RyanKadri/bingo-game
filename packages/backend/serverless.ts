@@ -1,26 +1,32 @@
 import { Serverless } from "serverless/aws";
 
 const dynamoEnvironment = {
-  BINGO_GAME_DYNAMO_TABLE: "${ssm:bingo-game-table}",
-  BINGO_BOARD_DYNAMO_TABLE: "${ssm:bingo-board-table}",
-  BINGO_PLAYER_DYNAMO_TABLE: "${ssm:bingo-player-table}",
-  BINGO_GAME_TTL_DAYS: "30",
+  BINGO_GAME_DYNAMO_TABLE: "${env:BINGO_GAME_DYNAMO_TABLE}",
+  BINGO_BOARD_DYNAMO_TABLE: "${env:BINGO_BOARD_DYNAMO_TABLE}",
+  BINGO_PLAYER_DYNAMO_TABLE: "${env:BINGO_PLAYER_DYNAMO_TABLE}",
+  BINGO_GAME_TTL_DAYS: "${env:BINGO_GAME_TTL_DAYS}",
   WEBSOCKET_BACKEND_ID: { "Ref": "WebsocketsApi" }
 };
 
 const config: Serverless = {
   service: "bingo-backend",
   frameworkVersion: "2",
+  useDotenv: true,
   provider: {
     name: "aws",
     runtime: "nodejs12.x",
     httpApi: {
       cors: true
     },
-    iamManagedPolicies: [
-      "arn:aws:iam::307651132348:policy/bingo-tables"
-    ],
-    websocketsApiName: "bingo-websocket",
+    stage: "${opt:stage}",
+    iam: {
+      role: {
+        managedPolicies: [
+          "arn:aws:iam::307651132348:policy/${env:BINGO_DYNAMO_POLICY}"
+        ],
+      } 
+    },
+    websocketsApiName: "bingo-websocket-${opt:stage}",
     websocketsApiRouteSelectionExpression: "$request.body.event"
   },
   plugins: [

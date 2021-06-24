@@ -10,7 +10,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.68",
-    "@types/serverless": "^1.78.16",
+    "@types/serverless": "^1.78.29",
     "@types/uuid": "^8.3.0",
     "@types/webpack-node-externals": "^2.5.0",
     "aws-sdk": "^2.820.0",
@@ -22,6 +22,7 @@
     "webpack-node-externals": "^2.5.2"
   },
   "dependencies": {
+    "serverless": "^2.48.0",
     "uuid": "^8.3.2"
   }
 }
