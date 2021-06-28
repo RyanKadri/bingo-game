@@ -8,12 +8,12 @@ resource "aws_dynamodb_table" "game-table" {
     name = "id"
     type = "S"
   }
-  lifecycle {
-    ignore_changes = [write_capacity, read_capacity]
-  }
   ttl {
     attribute_name = "expirationDate"
     enabled = true
+  }
+  lifecycle {
+    ignore_changes = [write_capacity, read_capacity]
   }
 }
 
@@ -27,12 +27,12 @@ resource "aws_dynamodb_table" "board-table" {
     name = "id"
     type = "S"
   }
-  lifecycle {
-    ignore_changes = [write_capacity, read_capacity]
-  }
   ttl {
     attribute_name = "expirationDate"
     enabled = true
+  }
+  lifecycle {
+    ignore_changes = [write_capacity, read_capacity]
   }
 }
 
@@ -57,6 +57,10 @@ resource "aws_dynamodb_table" "player-table" {
     projection_type = "ALL"
     write_capacity = var.starting-write-capacity
     read_capacity = var.starting-read-capacity
+  }
+  ttl {
+    attribute_name = "expirationDate"
+    enabled = true
   }
   lifecycle {
     ignore_changes = [write_capacity, read_capacity]

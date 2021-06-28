@@ -16,6 +16,7 @@ export function mockGame(overrides: DeepPartial<BingoGame>) {
         },
         calledNumbers: [],
         boards: [],
-        bingoCalls: []
+        bingoCalls: [],
+        expirationDate: Date.now()
     }, overrides);
 }

@@ -4,7 +4,7 @@ import { createBoard } from "../../common/src/utils/utils";
 import { BoardService } from "./board-service";
 import { useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
-import { shortUID, withCors } from "./utils/utils";
+import { shortUID, withStandardHeaders } from "./utils/utils";
 
 const client = useClient();
 const gameService = new GameService(client)
@@ -26,7 +26,7 @@ export const generateBoard: APIGatewayProxyHandlerV2 = async event => {
     return {
       statusCode: 200,
       body: JSON.stringify(newBoard),
-      ...withCors()
+      ...withStandardHeaders()
     };
 };
 
@@ -36,7 +36,7 @@ export const fetchBoard: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: !!board ? 200 : 404,
         body: JSON.stringify(board),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }
 
@@ -47,6 +47,6 @@ export const updateBoard: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: 200,
         body: JSON.stringify(boardUpdate),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }

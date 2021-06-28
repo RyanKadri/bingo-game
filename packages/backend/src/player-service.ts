@@ -2,7 +2,7 @@ import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { v4 } from "uuid";
 import { NewPlayer, Player } from "../../common/src/types/types";
 import { GameService } from "./game-service";
-import { playerTable } from "./utils/config";
+import { playerTable, playerTTL } from "./utils/config";
 
 export class PlayerService {
     constructor(
@@ -11,10 +11,13 @@ export class PlayerService {
     ) { }
 
     async savePlayer(newPlayer: NewPlayer) {
-        const player = {
+        const player: Player = {
             ...newPlayer,
-            id: v4()
+            id: v4(),
         };
+        if(playerTTL) {
+            player.expirationDate = (Date.now() / 1000) + playerTTL * 24 * 60 * 60;
+        }
 
         await this.client.put({
             TableName: playerTable,

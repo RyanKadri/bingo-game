@@ -1,3 +1,5 @@
+import { mockPlayer } from "../../utils/mock/player"
+
 context('Create User', () => {
     beforeEach(() => {
       cy.visit('/')
@@ -7,8 +9,9 @@ context('Create User', () => {
   
     it('Populates your name with sign-on value', () => {
 
-      cy.intercept({ method: "PUT", url: "**/players" }, { fixture: "createUser.json"})
-        .as("createUser")
+      cy.intercept({ method: "PUT", url: "**/players" }, 
+        mockPlayer({ name: "Bob Jones" })
+      ).as("createUser")
 
       // https://on.cypress.io/type
       cy.contains('Name')

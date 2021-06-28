@@ -29,9 +29,11 @@ context('Host a game', () => {
                 name: gameName, 
                 gameParams: expectedParams, 
                 players: [ examplePlayer ], 
-                listeners: [ examplePlayer.connectionId ]
+                listeners: [ examplePlayer.connectionId ],
             })
         ).as("fetchGame");
+
+        cy.wait("@fetchGame")
 
         cy.contains(/Hosting \".*?\"/)
             .should("have.text", `Hosting "${gameName}"`);

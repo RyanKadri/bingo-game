@@ -15,4 +15,8 @@ export const boardTable = assertExists(
     "Expected board table to be set"
 );
 
-export const gameTTL = parseInt(process.env.BINGO_GAME_TTL_DAYS ?? "1")
+export const gameTTL = parseInt(process.env.BINGO_GAME_TTL_DAYS ?? "1");
+
+export const playerTTL = !process.env.BINGO_PLAYER_TTL 
+    ? null 
+    : parseInt(process.env.BINGO_PLAYER_TTL, 10);

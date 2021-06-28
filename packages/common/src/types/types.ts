@@ -62,6 +62,7 @@ export interface NewPlayer {
 
 export interface Player extends NewPlayer {
     id: string;
+    expirationDate?: number;
 }
 
 export type BingoCommand = SubscribeCommand | UnsubscribeCommand | CallBingoCommand | RegisterPlayerConnection;

@@ -3,7 +3,7 @@ import { BingoGame, NewBingoGame } from "../../common/src/types/types";
 import { useClient } from "./dynamoClient";
 import { alertAllListeners } from "./game-events";
 import { GameService } from "./game-service";
-import { withCors } from "./utils/utils";
+import { withStandardHeaders } from "./utils/utils";
 
 const client = useClient();
 const gameService = new GameService(client);
@@ -15,7 +15,7 @@ export const createGame: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: 200,
         body: JSON.stringify(newGame),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }
 
@@ -25,7 +25,7 @@ export const fetchGame: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: !!game ? 200 : 404,
         body: JSON.stringify(game),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }
 
@@ -42,6 +42,6 @@ export const updateGame: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: 200,
         body: JSON.stringify(update),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }

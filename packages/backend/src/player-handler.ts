@@ -3,7 +3,7 @@ import { NewPlayer, RegisterPlayerConnection } from "../../common/src/types/type
 import { useClient } from "./dynamoClient";
 import { GameService } from "./game-service";
 import { PlayerService } from "./player-service";
-import { withCors } from "./utils/utils";
+import { withStandardHeaders } from "./utils/utils";
 
 const client = useClient();
 const gameService = new GameService(client);
@@ -22,7 +22,7 @@ export const updatePlayer: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: 200,
         body: JSON.stringify(newPlayer),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }
 
@@ -32,7 +32,7 @@ export const fetchPlayer: APIGatewayProxyHandlerV2 = async (e) => {
     return {
         statusCode: !!player ? 200 : 404,
         body: JSON.stringify(player),
-        ...withCors()
+        ...withStandardHeaders()
     }
 }
 

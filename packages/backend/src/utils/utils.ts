@@ -1,9 +1,10 @@
 import { v4 } from "uuid"
 
-export function withCors(others: { [key: string]: string } = {}) {
+export function withStandardHeaders(others: { [key: string]: string } = {}) {
     return { 
         headers: {
             "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
             ...others
         }
     }
